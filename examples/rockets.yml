@@ -1,0 +1,150 @@
+---
+uapi: 1.0
+info:
+  version: v1
+  title: Elon's Used Rocket Rentals
+rest_endpoints:
+  - url: https://api.byu.edu/uapi/rockets/v1
+    description: Production
+  - url: https://api.byu.edu/uapi/rockets/dev
+    description: Development
+
+resources:
+  # /rockets and /rockets/{id}
+  rockets:
+    type: identified
+    identified_by:
+      rocket_id:
+        type: string
+        pattern: '^B\d{4}$'
+        nullable: false
+        mutable: false
+        system: true
+        docs: >
+                This is a nice multiline doc describing this field
+        examples:
+        - B1045
+        - B1046
+        x-infohub-field: rocket_id
+    properties:
+      name:
+        type: string
+        mutable: true
+      flight_count:
+        type: int
+        derived: true
+      last_flight:
+        type: date-time
+        nullable: true
+        derived: true
+      block:
+        type: string
+        nullable: false
+        system: true
+        has_description: true
+        has_long_description: true
+        domain:
+          $ref: '#/domains/block'
+
+    listable:
+      searchable:
+
+    creates:
+      model: # JSON Schema
+        rocket_id
+
+    subresources:
+      completed_flights:
+        type: identified
+        identified_by:
+          flight_id:
+            type: string
+            pattern: '(F(1|9|H)|BFR)-\d+'
+            mutable: false
+            examples:
+            - F9-22
+            - FH-1
+        properties:
+          flight_name:
+            type: string
+            mutable: false
+            examples:
+            - value: TESS
+              description: NASA TESS
+              long_description: NASA Transiting Expolanet Survey Satellite
+            - value: Telstar-19V
+              description: Telstar 19 Vantage
+              long_description: Telstar 19 Vantage
+          liftoff_date_time:
+            type: date-time
+            mutable: false
+          launch_site:
+            type: string
+            mutable: false
+            domain:
+              $ref: '#/domains/launch_site'
+          recovery_attempted:
+            type: boolean
+            mutable: false
+          recovery_successful:
+            type: boolean
+            mutable: false
+          recovery_mode:
+            type: string
+            nullable: true
+            domain:
+              $ref: '#/domains/recovery_mode'
+          recovery_site:
+            type: string
+            nullable: true
+            domain:
+              $ref: '#/domains/recovery_site'
+          recovery_date_time:
+            type: date-time
+            nullable: true
+
+domains:
+  block:
+    type: string
+    docs: >- 
+      Manufacturing block. Used to differentiate different design evolutions of a single launch vehicle type.
+    examples:
+    - value: block5
+      description: Block 5
+  launch_site:
+    type: string
+    example:
+    - value: KSC_LC-39A
+      description: Kennedy Space Center LC-39A
+      long_description: Kennedy Space Center Historic Launch Complex 39-A
+    - value: VAFB_SLC-4E
+      description: Vandenburg SLC-4E
+      long_description: Vandenburg Air Force Base Space Launch Complex 4-East
+  recovery_mode:
+    type: string
+    docs: >- 
+      Attempted recovery mode - Parachute, Autonomous Spaceport Drone Ship, or Land.
+    examples:
+    - value: ASDS
+      description: Autonomous Spaceport Drone Ship
+      long_description: Propulsive landing at sea on robotic barge
+    - value: LAND
+      description: Ground Landing
+      long_description: Propulsive landing on dry ground
+  recovery_site:
+    type: string
+    docs: Attempted recovery site/ship
+    examples:
+    - value: CCAFS_LZ-1
+      description: CCAFS Landing Zone 1
+      long_description: Cape Canaveral Air Force Station Landing Zone 1
+    - value: ASDS_JRTI
+      description: Just Read The Instructions
+      long_description: ASDS Just Read The Instructions
+    - value: ASDS_OCISLY
+      description: Of Course I Still Love You
+      long_description: ASDS Of Course I Still Love You
+      
+    
+    
+
