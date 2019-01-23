@@ -1,0 +1,634 @@
+{
+  "$id": "http://api.byu.edu/uapi/v0.1",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "description": "Root object of a University API definition document",
+  "required": [
+    "$uapi",
+    "info",
+    "resources"
+  ],
+  "properties": {
+    "$uapi": {
+      "$ref": "#/definitions/uapi-version"
+    },
+    "$schema": {
+      "type": "string"
+    },
+    "info": {
+      "$ref": "#/definitions/uapi-info"
+    },
+    "resources": {
+      "$ref": "#/definitions/uapi-resources"
+    },
+    "definitions": {
+      "type": "object"
+    }
+  },
+  "patternProperties": {
+    "^x-": {
+      "$ref": "#/definitions/uapi-extension"
+    }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "uapi-version": {
+      "description": "UAPI Specification Version",
+      "type": "string",
+      "const": "0.1"
+    },
+    "uapi-info": {
+      "description": "Information about a University API definition",
+      "type": "object",
+      "required": [
+        "name",
+        "version"
+      ],
+      "properties": {
+        "name": {
+          "description": "Human-readable name of this API",
+          "type": "string"
+        },
+        "version": {
+          "description": "Version number of this API definition",
+          "type": "string"
+        },
+        "documentation": {
+          "description": "Long-form information about this API"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-resources": {
+      "description": "Holds definitions of top-level resources",
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9][_a-z0-9]*[a-z0-9]$": {
+          "$ref": "#/definitions/uapi-resource"
+        },
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-resource": {
+      "description": "Defines a top-level UAPI Resource",
+      "if": {
+        "properties": {
+          "type": {
+            "const": "list"
+          }
+        }
+      },
+      "then": {
+        "$ref": "#/definitions/uapi-list-resource"
+      },
+      "else": {
+        "$ref": "#/definitions/uapi-singleton-resource"
+      }
+    },
+    "uapi-list-resource": {
+      "type": "object",
+      "required": [
+        "type",
+        "keys",
+        "properties"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "list"
+          ]
+        },
+        "keys": {
+          "$ref": "#/definitions/uapi-keys"
+        },
+        "properties": {
+          "$ref": "#/definitions/uapi-properties"
+        },
+        "create": {
+          "$ref": "#/definitions/uapi-create-mutation"
+        },
+        "update": {
+          "$ref": "#/definitions/uapi-update-mutation"
+        },
+        "delete": {
+          "$ref": "#/definitions/uapi-delete-mutation"
+        },
+        "subresources": {
+          "$ref": "#/definitions/uapi-subresources"
+        },
+        "documentation": {
+          "type": "string"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-singleton-resource": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "singleton"
+          ]
+        },
+        "properties": {
+          "$ref": "#/definitions/uapi-properties"
+        },
+        "create": {
+          "$ref": "#/definitions/uapi-create-mutation"
+        },
+        "update": {
+          "$ref": "#/definitions/uapi-update-mutation"
+        },
+        "delete": {
+          "$ref": "#/definitions/uapi-delete-mutation"
+        },
+        "subresources": {
+          "$ref": "#/definitions/uapi-subresources"
+        },
+        "documentation": {
+          "type": "string"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-subresources": {
+      "description": "Holds definitions of subresources",
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9][_a-z0-9]*[a-z0-9]$": {
+          "$ref": "#/definitions/uapi-subresource"
+        },
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-subresource": {
+      "description": "Defines a UAPI Subresource",
+      "if": {
+        "properties": {
+          "type": {
+            "const": "list"
+          }
+        }
+      },
+      "then": {
+        "$ref": "#/definitions/uapi-list-subresource"
+      },
+      "else": {
+        "$ref": "#/definitions/uapi-singleton-subresource"
+      }
+    },
+    "uapi-list-subresource": {
+      "type": "object",
+      "required": [
+        "type",
+        "keys",
+        "properties"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "list"
+          ]
+        },
+        "keys": {
+          "$ref": "#/definitions/uapi-keys"
+        },
+        "properties": {
+          "$ref": "#/definitions/uapi-properties"
+        },
+        "create": {
+          "$ref": "#/definitions/uapi-create-mutation"
+        },
+        "update": {
+          "$ref": "#/definitions/uapi-update-mutation"
+        },
+        "delete": {
+          "$ref": "#/definitions/uapi-delete-mutation"
+        },
+        "documentation": {
+          "type": "string"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-singleton-subresource": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "singleton"
+          ]
+        },
+        "properties": {
+          "$ref": "#/definitions/uapi-properties"
+        },
+        "create": {
+          "$ref": "#/definitions/uapi-create-mutation"
+        },
+        "update": {
+          "$ref": "#/definitions/uapi-update-mutation"
+        },
+        "delete": {
+          "$ref": "#/definitions/uapi-delete-mutation"
+        },
+        "documentation": {
+          "type": "string"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+
+    "uapi-keys": {
+      "description": "Key parameter definitions",
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uapi-key"
+      },
+      "minItems": 1
+    },
+    "uapi-key": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/uapi-property-name"
+        },
+        "type": {
+          "$ref": "#/definitions/uapi-value-type"
+        },
+        "constraints": {
+          "$ref": "#/definitions/uapi-value-constraints"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-properties": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uapi-property"
+      },
+      "minItems": 1
+    },
+    "uapi-property": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/definitions/uapi-value-property"
+        },
+        {
+          "$ref": "#/definitions/uapi-value-array-property"
+        },
+        {
+          "$ref": "#/definitions/uapi-object-property"
+        },
+        {
+          "$ref": "#/definitions/uapi-object-array-property"
+        }
+      ]
+    },
+    "uapi-property-definition": {
+      "type": "object",
+      "required": [
+        "name",
+        "api_types"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/definitions/uapi-property-name"
+        },
+        "api_types": {
+          "$ref": "#/definitions/uapi-api-types-set"
+        },
+        "has_description": {
+          "type": "boolean"
+        },
+        "has_long_description": {
+          "type": "boolean"
+        },
+        "has_display_label": {
+          "type": "boolean"
+        },
+        "nullable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "uapi-api-types-set": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "$ref": "#/definitions/uapi-api-type"
+      }
+    },
+    "uapi-api-type": {
+      "type": "string",
+      "enum": [
+        "read-only",
+        "modifiable",
+        "system",
+        "derived",
+        "related"
+      ]
+    },
+    "uapi-property-name": {
+      "type": "string",
+      "pattern": "^[a-z0-9][_a-z0-9]*[a-z0-9]$"
+    },
+    "uapi-value-property": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/uapi-property-definition"
+        },
+        {
+          "required": [
+            "value"
+          ],
+          "properties": {
+            "value": {
+              "$ref": "#/definitions/uapi-value-property-definition"
+            },
+            "key": {
+              "type": "boolean"
+            }
+          }
+        }
+      ]
+    },
+    "uapi-value-property-definition": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/uapi-value-type"
+        },
+        "constraints": {
+          "$ref": "#/definitions/uapi-value-constraints"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-value-array-property": {
+      "allOf": [
+        {
+          "$ref": "#/definitions/uapi-property-definition"
+        },
+        {
+          "type": "object",
+          "required": [
+            "value_array"
+          ],
+          "properties": {
+            "value_array": {
+              "$ref": "#/definitions/uapi-value-array-property-definition"
+            }
+          }
+        }
+      ]
+    },
+    "uapi-value-array-property-definition": {
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/uapi-value-property-definition"
+        },
+        "constraints": {
+          "$ref": "#/definitions/uapi-array-constraints"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-array-constraints": {
+      "type": "object",
+      "properties": {
+        "minItems": {
+          "type": "integer"
+        },
+        "maxItems": {
+          "type": "integer"
+        },
+        "uniqueItems": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-object-property": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/uapi-property-definition"
+        },
+        {
+          "required": [
+            "object"
+          ],
+          "properties": {
+            "object": {
+              "$ref": "#/definitions/uapi-object-property-definition"
+            }
+          }
+        }
+      ]
+    },
+    "uapi-object-property-definition": {
+      "type": "object",
+      "required": [
+        "properties"
+      ],
+      "properties": {
+        "properties": {
+          "$ref": "#/definitions/uapi-properties"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-object-array-property": {
+      "type": "object",
+      "allOf": [
+        {
+          "$ref": "#/definitions/uapi-property-definition"
+        },
+        {
+          "required": [
+            "object_array"
+          ],
+          "properties": {
+            "object_array": {
+              "$ref": "#/definitions/uapi-object-array-property-definition"
+            }
+          }
+        }
+      ]
+    },
+    "uapi-object-array-property-definition": {
+      "type": "object",
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "$ref": "#/definitions/uapi-object-property-definition"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-create-mutation": {
+      "type": "object",
+      "required": [
+        "input_schema"
+      ],
+      "properties": {
+        "input_schema": {
+          "$ref": "#/definitions/uapi-input-schema"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-update-mutation": {
+      "type": "object",
+      "required": [
+        "input_schema"
+      ],
+      "properties": {
+        "input_schema": {
+          "$ref": "#/definitions/uapi-input-schema"
+        },
+        "creates_if_missing": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-delete-mutation": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "uapi-input-schema": {
+      "type": "object",
+      "additionalProperties": false
+    },
+    "uapi-value-type": {
+      "description": "Predefined UAPI data types",
+      "type": "string",
+      "enum": [
+        "int",
+        "big-int",
+        "decimal",
+        "big-decimal",
+        "string",
+        "boolean",
+        "date",
+        "date-time",
+        "binary-string"
+      ]
+    },
+    "uapi-value-constraints": {
+      "type": "object",
+      "properties": {
+        "pattern": {
+          "type": "string"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "minimum": {
+          "type": "number"
+        },
+        "exclusiveMaximum": {
+          "type": "number"
+        },
+        "exclusiveMinimum": {
+          "type": "number"
+        },
+        "maxLength": {
+          "type": "integer"
+        },
+        "minLength": {
+          "type": "integer"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-resource-type": {
+      "description": "Resource Types",
+      "type": "string",
+      "enum": [
+        "list",
+        "singleton"
+      ]
+    },
+    "uapi-extension": {
+      "description": "Extension. Anything starting with 'x-' is valid",
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "number"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "object"
+        },
+        {
+          "type": "array"
+        }
+      ]
+    }
+  }
+}

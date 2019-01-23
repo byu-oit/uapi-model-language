@@ -1,0 +1,67 @@
+{
+  "$uapi": "0.1",
+  "$schema": "http://api.byu.edu/uapi/v0.1",
+  "info": {
+    "name": "Rockets API",
+    "version": "1.0"
+  },
+  "resources": {
+    "rockets": {
+      "type": "list",
+      "keys": [
+        {
+          "name": "rocket_id",
+          "type": "string"
+        }
+      ],
+      "properties": [
+        {
+          "name": "rocket_id",
+          "value": {
+            "type": "string"
+          },
+          "api_types": [
+            "system"
+          ]
+        }
+      ],
+      "subresources": {
+        "sub": {
+          "type": "list",
+          "keys": [
+            {
+              "name": "sub_id",
+              "type": "int"
+            }
+          ],
+          "properties": [
+            {
+              "name": "sub_id",
+              "key": true,
+              "value": {
+                "type": "int"
+              },
+              "api_types": [
+                "system"
+              ]
+            }
+          ]
+        }
+      }
+    },
+    "bdfl": {
+      "type": "singleton",
+      "properties": [
+        {
+          "name": "name",
+          "value": {
+            "type": "string"
+          },
+          "api_types": [
+            "system"
+          ]
+        }
+      ]
+    }
+  }
+}
