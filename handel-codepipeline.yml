@@ -12,9 +12,9 @@ pipelines:
       branch: master
     - type: codebuild
       name: Build
-      build_image: aws/codebuild/eb-nodejs-6.10.0-amazonlinux-64:4.0.0
-    - type: handel
-      name: DevDeploy
-      environments_to_deploy:
-      - dev
-# https://handel-codepipeline.readthedocs.io
+      build_image: <account>/docker-openjdk-maven
+      cache: s3
+#    - type: slack_notify
+#      name: Notify
+#      channel: "#custom-code-bots"
+#      message: "Successfully built and deployed uapi-model-language to maven repo"
