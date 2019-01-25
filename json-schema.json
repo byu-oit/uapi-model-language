@@ -21,8 +21,11 @@
     "resources": {
       "$ref": "#/definitions/uapi-resources"
     },
-    "definitions": {
-      "type": "object"
+    "documentation": {
+      "$ref": "#/definitions/uapi-documentation"
+    },
+    "$comment": {
+      "$ref": "#/definitions/uapi-comment"
     }
   },
   "patternProperties": {
@@ -54,7 +57,10 @@
           "type": "string"
         },
         "documentation": {
-          "description": "Long-form information about this API"
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
         }
       },
       "patternProperties": {
@@ -67,17 +73,19 @@
     "uapi-resources": {
       "description": "Holds definitions of top-level resources",
       "type": "object",
+      "properties": {
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
       "patternProperties": {
         "^[a-z0-9][_a-z0-9]*[a-z0-9]$": {
-          "$ref": "#/definitions/uapi-resource"
-        },
-        "^x-": {
-          "$ref": "#/definitions/uapi-extension"
+          "$ref": "#/definitions/uapi-resource-model"
         }
       },
       "additionalProperties": false
     },
-    "uapi-resource": {
+    "uapi-resource-model": {
       "description": "Defines a top-level UAPI Resource",
       "if": {
         "properties": {
@@ -87,13 +95,13 @@
         }
       },
       "then": {
-        "$ref": "#/definitions/uapi-list-resource"
+        "$ref": "#/definitions/uapi-list-resource-model"
       },
       "else": {
-        "$ref": "#/definitions/uapi-singleton-resource"
+        "$ref": "#/definitions/uapi-singleton-resource-model"
       }
     },
-    "uapi-list-resource": {
+    "uapi-list-resource-model": {
       "type": "object",
       "required": [
         "type",
@@ -113,6 +121,9 @@
         "properties": {
           "$ref": "#/definitions/uapi-properties"
         },
+        "list": {
+          "$ref": "#/definitions/uapi-list-feature-model"
+        },
         "create": {
           "$ref": "#/definitions/uapi-create-mutation"
         },
@@ -125,8 +136,11 @@
         "subresources": {
           "$ref": "#/definitions/uapi-subresources"
         },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        },
         "documentation": {
-          "type": "string"
+          "$ref": "#/definitions/uapi-documentation"
         }
       },
       "patternProperties": {
@@ -136,7 +150,7 @@
       },
       "additionalProperties": false
     },
-    "uapi-singleton-resource": {
+    "uapi-singleton-resource-model": {
       "type": "object",
       "properties": {
         "type": {
@@ -148,9 +162,6 @@
         "properties": {
           "$ref": "#/definitions/uapi-properties"
         },
-        "create": {
-          "$ref": "#/definitions/uapi-create-mutation"
-        },
         "update": {
           "$ref": "#/definitions/uapi-update-mutation"
         },
@@ -160,8 +171,11 @@
         "subresources": {
           "$ref": "#/definitions/uapi-subresources"
         },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        },
         "documentation": {
-          "type": "string"
+          "$ref": "#/definitions/uapi-documentation"
         }
       },
       "patternProperties": {
@@ -174,17 +188,19 @@
     "uapi-subresources": {
       "description": "Holds definitions of subresources",
       "type": "object",
+      "properties": {
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
       "patternProperties": {
         "^[a-z0-9][_a-z0-9]*[a-z0-9]$": {
-          "$ref": "#/definitions/uapi-subresource"
-        },
-        "^x-": {
-          "$ref": "#/definitions/uapi-extension"
+          "$ref": "#/definitions/uapi-subresource-model"
         }
       },
       "additionalProperties": false
     },
-    "uapi-subresource": {
+    "uapi-subresource-model": {
       "description": "Defines a UAPI Subresource",
       "if": {
         "properties": {
@@ -194,13 +210,13 @@
         }
       },
       "then": {
-        "$ref": "#/definitions/uapi-list-subresource"
+        "$ref": "#/definitions/uapi-list-subresource-model"
       },
       "else": {
-        "$ref": "#/definitions/uapi-singleton-subresource"
+        "$ref": "#/definitions/uapi-singleton-subresource-model"
       }
     },
-    "uapi-list-subresource": {
+    "uapi-list-subresource-model": {
       "type": "object",
       "required": [
         "type",
@@ -220,6 +236,9 @@
         "properties": {
           "$ref": "#/definitions/uapi-properties"
         },
+        "list": {
+          "$ref": "#/definitions/uapi-list-feature-model"
+        },
         "create": {
           "$ref": "#/definitions/uapi-create-mutation"
         },
@@ -230,7 +249,10 @@
           "$ref": "#/definitions/uapi-delete-mutation"
         },
         "documentation": {
-          "type": "string"
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
         }
       },
       "patternProperties": {
@@ -240,20 +262,15 @@
       },
       "additionalProperties": false
     },
-    "uapi-singleton-subresource": {
+    "uapi-singleton-subresource-model": {
       "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "enum": [
-            "singleton"
-          ]
+          "const": "singleton"
         },
         "properties": {
           "$ref": "#/definitions/uapi-properties"
-        },
-        "create": {
-          "$ref": "#/definitions/uapi-create-mutation"
         },
         "update": {
           "$ref": "#/definitions/uapi-update-mutation"
@@ -262,7 +279,10 @@
           "$ref": "#/definitions/uapi-delete-mutation"
         },
         "documentation": {
-          "type": "string"
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
         }
       },
       "patternProperties": {
@@ -272,33 +292,13 @@
       },
       "additionalProperties": false
     },
-
     "uapi-keys": {
       "description": "Key parameter definitions",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/uapi-key"
+        "$ref": "#/definitions/uapi-property-name"
       },
       "minItems": 1
-    },
-    "uapi-key": {
-      "type": "object",
-      "required": [
-        "name",
-        "type"
-      ],
-      "properties": {
-        "name": {
-          "$ref": "#/definitions/uapi-property-name"
-        },
-        "type": {
-          "$ref": "#/definitions/uapi-value-type"
-        },
-        "constraints": {
-          "$ref": "#/definitions/uapi-value-constraints"
-        }
-      },
-      "additionalProperties": false
     },
     "uapi-properties": {
       "type": "array",
@@ -348,6 +348,17 @@
         },
         "nullable": {
           "type": "boolean"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       }
     },
@@ -404,6 +415,14 @@
         },
         "constraints": {
           "$ref": "#/definitions/uapi-value-constraints"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
@@ -437,6 +456,14 @@
         },
         "constraints": {
           "$ref": "#/definitions/uapi-array-constraints"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
@@ -452,6 +479,17 @@
         },
         "uniqueItems": {
           "type": "boolean"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
@@ -482,6 +520,14 @@
       "properties": {
         "properties": {
           "$ref": "#/definitions/uapi-properties"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
@@ -512,6 +558,17 @@
       "properties": {
         "items": {
           "$ref": "#/definitions/uapi-object-property-definition"
+        },
+        "constraints": {
+          "$ref": "#/definitions/uapi-array-constraints"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
@@ -524,6 +581,17 @@
       "properties": {
         "input_schema": {
           "$ref": "#/definitions/uapi-input-schema"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
@@ -539,16 +607,279 @@
         },
         "creates_if_missing": {
           "type": "boolean"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
     },
     "uapi-delete-mutation": {
       "type": "object",
+      "properties": {
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
       "additionalProperties": false
     },
     "uapi-input-schema": {
       "type": "object",
+      "properties": {
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-list-feature-model": {
+      "type": "object",
+      "required": [],
+      "properties": {
+        "subset": {
+          "$ref": "#/definitions/uapi-list-subset-feature"
+        },
+        "filters": {
+          "$ref": "#/definitions/uapi-list-filters-feature"
+        },
+        "sorting": {
+          "$ref": "#/definitions/uapi-list-sort-feature"
+        },
+        "search": {
+          "$ref": "#/definitions/uapi-list-search-feature"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-list-subset-feature": {
+      "type": "object",
+      "required": [
+        "default_size",
+        "max_size"
+      ],
+      "properties": {
+        "default_size": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "max_size": {
+          "type": "integer",
+          "exclusiveMinimum": 0
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-list-filters-feature": {
+      "type": "object",
+      "required": ["parameters"],
+      "properties": {
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uapi-list-filter-parameter"
+          }
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-list-filter-parameter": {
+      "type": "object",
+      "required": [
+        "name",
+        "type"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z0-9][._a-z0-9]*[a-z0-9]$"
+        },
+        "type": {
+          "$ref": "#/definitions/uapi-value-type"
+        },
+        "constraints": {
+          "$ref": "#/definitions/uapi-value-constraints"
+        },
+        "supported_operators": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uapi-list-filter-operator"
+          },
+          "uniqueItems": true
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-list-filter-operator": {
+      "type": "string",
+      "enum": [
+        "starts_with",
+        "ends_with",
+        "contains",
+        "gt",
+        "gt_or_eq",
+        "lt",
+        "lt_or_eq",
+        "not_eq",
+        "is_null",
+        "is_empty",
+        "not_in"
+      ]
+    },
+    "uapi-list-sort-feature": {
+      "type": "object",
+      "required": [
+        "available_sort_properties",
+        "default_sort_properties",
+        "default_sort_order"
+      ],
+      "properties": {
+        "available_sort_properties": {
+          "$ref": "#/definitions/uapi-sort-properties"
+        },
+        "default_sort_properties": {
+          "$ref": "#/definitions/uapi-sort-properties"
+        },
+        "default_sort_order": {
+          "$ref": "#/definitions/uapi-sort-order"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-sort-properties": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/uapi-property-name"
+      },
+      "uniqueItems": true
+    },
+    "uapi-sort-order": {
+      "type": "string",
+      "enum": [
+        "ascending",
+        "descending"
+      ]
+    },
+    "uapi-list-search-feature": {
+      "type": "object",
+      "required": [
+        "search_contexts_available"
+      ],
+      "properties": {
+        "search_contexts_available": {
+          "$ref": "#/definitions/uapi-search-contexts"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      },
+      "additionalProperties": false
+    },
+    "uapi-search-contexts": {
+      "type": "object",
+      "properties": {
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        }
+      },
+      "patternProperties": {
+        "^[a-z0-9][_a-z0-9][a-z0-9]$": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/uapi-property-name"
+          },
+          "uniqueItems": true
+        }
+      },
       "additionalProperties": false
     },
     "uapi-value-type": {
@@ -594,7 +925,19 @@
           "type": "array",
           "items": {
             "type": "string"
-          }
+          },
+          "uniqueItems": true
+        },
+        "$comment": {
+          "$ref": "#/definitions/uapi-comment"
+        },
+        "documentation": {
+          "$ref": "#/definitions/uapi-documentation"
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
         }
       },
       "additionalProperties": false
@@ -629,6 +972,14 @@
           "type": "array"
         }
       ]
+    },
+    "uapi-comment": {
+      "description": "Text comment.",
+      "type": "string"
+    },
+    "uapi-documentation": {
+      "description": "Describes an element. Can contain valid CommonMark-flavored Markdown.",
+      "type": "string"
     }
   }
 }

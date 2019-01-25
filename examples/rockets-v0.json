@@ -22,9 +22,17 @@
           },
           "api_types": [
             "system"
-          ]
+          ],
+          "has_description": true,
+          "nullable": false
         }
       ],
+      "list": {
+        "subset": {
+          "max_items": 12,
+          "default_items": 3
+        }
+      },
       "subresources": {
         "sub": {
           "type": "list",

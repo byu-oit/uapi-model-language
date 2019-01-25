@@ -1,34 +1,30 @@
 package edu.byu.uapi.model
 
-sealed class UAPISubresourceModel : UAPIDocumentable, UAPIExtensible {
-    abstract val name: String
-
-    abstract val properties: List<UAPIPropertyModel>
-
-    abstract val create: UAPICreateMutationModel?
-    abstract val update: UAPIUpdateMutationModel?
-    abstract val delete: UAPIDeleteMutationModel?
+sealed class UAPISubresourceModel : UAPIDocumentable, UAPICommentable, UAPIExtensible {
+    abstract val type: UAPIResourceType
 }
 
 data class UAPIListSubresourceModel(
-    override val name: String,
-    override val properties: List<UAPIPropertyModel>,
-    val keys: List<UAPIKeyFieldModel>,
+    val keys: List<UAPIKey>,
+    val properties: List<UAPIProperty>,
     val list: UAPIListFeatureModel,
-    override val create: UAPICreateMutationModel? = null,
-    override val update: UAPIUpdateMutationModel? = null,
-    override val delete: UAPIDeleteMutationModel? = null,
+    val create: UAPICreateMutation? = null,
+    val update: UAPIUpdateMutation? = null,
+    val delete: UAPIDeleteMutation? = null,
     override val documentation: String? = null,
-    override val extensions: Map<String, Any> = emptyMap()
-) : UAPISubresourceModel()
+    override val `$comment`: String? = null,
+    override val extensions: UAPIExtensions = mutableMapOf()
+) : UAPISubresourceModel() {
+    override val type = UAPIResourceType.LIST
+}
 
 data class UAPISingletonSubresourceModel(
-    override val name: String,
-    override val properties: List<UAPIPropertyModel>,
-    override val create: UAPICreateMutationModel? = null,
-    override val update: UAPIUpdateMutationModel? = null,
-    override val delete: UAPIDeleteMutationModel? = null,
+    val properties: List<UAPIProperty>,
+    val update: UAPIUpdateMutation? = null,
+    val delete: UAPIDeleteMutation? = null,
     override val documentation: String? = null,
-    override val extensions: Map<String, Any> = emptyMap()
-) : UAPISubresourceModel()
-
+    override val `$comment`: String? = null,
+    override val extensions: UAPIExtensions = mutableMapOf()
+) : UAPISubresourceModel() {
+    override val type = UAPIResourceType.SINGLETON
+}

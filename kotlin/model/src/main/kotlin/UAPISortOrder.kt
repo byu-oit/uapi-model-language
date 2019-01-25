@@ -1,7 +1,8 @@
 package edu.byu.uapi.model
 
-enum class UAPISortOrder {
-    ASCENDING, DESCENDING;
-
-    override fun toString(): String = name.toLowerCase()
+enum class UAPISortOrder(
+    override val apiValue: String
+) : UAPIEnum {
+    ASCENDING("ascending"),
+    DESCENDING("descending")
 }
