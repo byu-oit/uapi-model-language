@@ -9,10 +9,7 @@
     "rockets": {
       "type": "list",
       "keys": [
-        {
-          "name": "rocket_id",
-          "type": "string"
-        }
+        "rocket_id"
       ],
       "properties": [
         {
@@ -29,18 +26,15 @@
       ],
       "list": {
         "subset": {
-          "max_items": 12,
-          "default_items": 3
+          "max_size": 12,
+          "default_size": 3
         }
       },
       "subresources": {
         "sub": {
           "type": "list",
           "keys": [
-            {
-              "name": "sub_id",
-              "type": "int"
-            }
+            "sub_id"
           ],
           "properties": [
             {

@@ -2,10 +2,11 @@ version: 0.2
 phases:
   install:
     commands:
-      - apk add make
+      - apk add make nodejs npm
   build:
     commands:
-      - make build
+      - make compile
+      - make test
   post_build:
     commands:
       - make deploy
