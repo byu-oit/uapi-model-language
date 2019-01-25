@@ -3,6 +3,7 @@ phases:
   install:
     commands:
       - apk add make nodejs npm
+      - chmod u+x kotlin/mvnw
   build:
     commands:
       - make compile

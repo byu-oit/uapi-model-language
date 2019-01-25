@@ -14,7 +14,7 @@ pipelines:
       name: Build
       build_image: <account>/docker-openjdk-maven
       cache: s3
-#    - type: slack_notify
-#      name: Notify
-#      channel: "#custom-code-bots"
-#      message: "Successfully built and deployed uapi-model-language to maven repo"
+    - type: slack_notify
+      name: Notify
+      channel: "#custom-code-bots"
+      message: "Successfully built and deployed uapi-model-language jars to maven repo"
