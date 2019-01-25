@@ -2,13 +2,13 @@ version: 0.2
 phases:
   install:
     commands:
-      - chmod u+x .cicd/*.sh
+      - apk add make
   build:
     commands:
-      - cd kotlin && mvn clean install
+      - make build
   post_build:
     commands:
-      - cd kotlin && mvn deploy
+      - make deploy
 cache:
   paths:
     - '/root/.m2/repository/**/*'

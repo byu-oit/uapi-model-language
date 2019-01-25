@@ -30,6 +30,7 @@
 
     <modules>
         <module>model</module>
+        <module>translators/openapi3</module>
     </modules>
 
     <properties>
