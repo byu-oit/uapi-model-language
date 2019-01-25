@@ -1,4 +1,9 @@
 version: 0.2
+
+env:
+  variables:
+    MAVEN_CONFIG: "--settings /usr/share/java/maven-3/conf/settings.xml"
+
 phases:
   install:
     commands:
@@ -14,3 +19,6 @@ phases:
 cache:
   paths:
     - '/root/.m2/repository/**/*'
+    - '/root/.m2/wrapper/**/*'
+    - '/root/.npm/**/*'
+    - '/var/cache/apk/**/*'
