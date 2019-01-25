@@ -298,6 +298,7 @@
       "items": {
         "$ref": "#/definitions/uapi-property-name"
       },
+      "uniqueItems": true,
       "minItems": 1
     },
     "uapi-properties": {

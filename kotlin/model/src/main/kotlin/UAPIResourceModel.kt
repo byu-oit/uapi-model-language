@@ -6,7 +6,7 @@ sealed class UAPIResourceModel : UAPIDocumentable, UAPICommentable, UAPIExtensib
 }
 
 data class UAPIListResourceModel(
-    val keys: List<UAPIKey>,
+    val keys: List<String>,
     val properties: List<UAPIProperty>,
     val list: UAPIListFeatureModel,
     val create: UAPICreateMutation? = null,
