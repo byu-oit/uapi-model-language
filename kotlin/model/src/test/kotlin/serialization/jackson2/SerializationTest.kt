@@ -13,7 +13,6 @@ import edu.byu.uapi.model.UAPIValueType
 
 fun main() {
     val prop = UAPIProperty(
-        name = "hi",
         definition = UAPIValuePropertyDefinition(
             UAPIValueType.BIG_DECIMAL
         ),

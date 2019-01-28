@@ -1,0 +1,290 @@
+---
+"$uapi": "0.1"
+"$schema": "http://api.byu.edu/uapi/v0.1"
+info:
+  name: "Persons"
+  version: "3.0"
+resources:
+  persons:
+    type: list
+    keys: [byu_id]
+    properties:
+      byu_id:
+        value:
+          type: string
+          constraints:
+            pattern: "^[0-9]{9}$"
+        api_types: [system]
+      created_by_byu_id:
+        value:
+          type: string
+          constraints:
+            pattern: "^[0-9]{9}$"
+        has_description: true
+        api_types: [system]
+      created_datetime:
+        value:
+          type: date-time
+        api_types: [system]
+      deceased:
+        value:
+          type: boolean
+        api_types: [related]
+      first_name:
+        value:
+          type: string
+        api_types: [modifiable, read-only]
+      high_school_city:
+        value:
+          type: string
+        api_types: [derived]
+      high_school_code:
+        value:
+          type: string
+        has_description: true
+        api_types: [modifiable, read-only]
+      high_school_state_code:
+        value:
+          type: string
+        has_description: true
+        api_types: [derived]
+      home_country_code:
+        value:
+          type: string
+        has_description: true
+        api_types: [modifiable, read-only]
+      home_state_code:
+        value:
+          type: string
+        has_description: true
+        api_types: [modifiable, read-only]
+      home_town:
+        value:
+          type: string
+        api_types: [modifiable, read-only]
+      merge_in_process:
+        value:
+          type: boolean
+        api_types: [derived]
+      middle_name:
+        value:
+          type: string
+        api_types: [modifiable, read-only]
+      name_fnf:
+        value:
+          type: string
+        api_types: [derived]
+      name_lnf:
+        value:
+          type: string
+        api_types: [derived]
+      net_id:
+        value:
+          type: string
+        api_types: [related]
+      person_id:
+        value:
+          type: string
+        api_types: [system]
+      personal_email_address:
+        value:
+          type: string
+        api_types: [related]
+      preferred_first_name:
+        value:
+          type: string
+        nullable: true
+        api_types: [modifiable, read-only]
+      preferred_name:
+        value:
+          type: string
+        api_types: [derived]
+      preferred_surname:
+        value:
+          type: string
+        nullable: true
+        api_types: [modifiable, read-only]
+      primary_phone_number:
+        value:
+          type: string
+        nullable: true
+        api_types: [related]
+      rest_of_name:
+        value:
+          type: string
+        api_types: [derived]
+      restricted:
+        value:
+          type: boolean
+        api_types: [modifiable, read-only]
+      sex:
+        value:
+          type: string
+          constraints:
+            enum: [M, F, '?', U]
+        api_types: [modifiable, read-only]
+      suffix:
+        value:
+          type: string
+        nullable: true
+        api_types: [modifiable, read-only]
+      surname:
+        value:
+          type: string
+        nullable: true
+        api_types: [modifiable, read-only]
+      updated_by_byu_id:
+        value:
+          type: string
+          constraints:
+            pattern: '^[0-9]{9}$'
+        has_description: true
+        api_types: [system]
+      updated_datetime:
+        value:
+          type: date-time
+        api_types: [system]
+    list:
+      filters:
+        byu_ids:
+          type: string
+          constraints:
+            pattern: '^[0-9]{9}$'
+          allow_multiple: true
+        surname:
+          type: string
+          supported_operators: [
+            starts_with,
+            ends_with,
+            contains,
+            is_null,
+            is_empty
+          ]
+      subset:
+        default_size: 100
+        max_size: 100
+      search:
+        search_contexts_available:
+          identifiers:
+          - net_id
+          - sort_name
+          - byu_id
+          names:
+          - preferred_last_name
+          - last_name
+          - preferred_first_name
+          - first_name
+          locations:
+          - home_country
+          - home_state
+      sorting:
+        available_sort_properties:
+          - byu_id
+          - net_id
+          - name_lnf
+          - name_fnf
+          - preferred_name
+          - created_datetime
+          - updated_datetime
+        default_sort_properties:
+          - preferred_name
+          - byu_id
+        default_sort_order: ascending
+
+    subresources:
+      employee_summary:
+        type: singleton
+        properties:
+          byu_id:
+            value:
+              type: string
+              constraints:
+                pattern: '^[0-9]{9}$'
+            api_types: [system]
+          department:
+            value:
+              type: string
+            nullable: true
+            api_types: [related]
+          employee_role:
+            value:
+              type: string
+            has_description: true
+            api_types: [derived]
+          hire_date:
+            value:
+              type: date
+            api_types: [related]
+          job_code:
+            value:
+              type: string
+            has_description: true
+            nullable: true
+            api_types: [related]
+          reports_to_id:
+            value:
+              type: string
+            has_description: true
+            nullable: true
+            api_types: [related]
+      languages:
+        type: list
+        keys: [language_code]
+        properties:
+          byu_id:
+            value:
+              type: string
+            has_description: true
+            api_types: [system]
+          created_by_byu_id:
+            value:
+              type: string
+            has_description: true
+            api_types: [system]
+          created_datetime:
+            value:
+              type: date-time
+            api_types: [system]
+          language_code:
+            value:
+              type: string
+            has_description: true
+            has_long_description: true
+            api_types: [modifiable, read-only]
+          native:
+            value:
+              type: boolean
+            api_types: [modifiable, read-only]
+          read_proficiency:
+            value:
+              type: string
+              constraints:
+                enum: [H, M, L, N]
+            api_types: [modifiable, read-only]
+          speak_proficiency:
+            value:
+              type: string
+              constraints:
+                enum: [H, M, L, N]
+            api_types: [modifiable, read-only]
+          translator:
+            value:
+              type: boolean
+            api_types: [modifiable, read-only]
+          updated_by_byu_id:
+            value:
+              type: string
+            has_description: true
+            api_types: [system]
+          updated_datetime:
+            value:
+              type: date-time
+            api_types: [system]
+          write_proficiency:
+            value:
+              type: string
+              constraints:
+                enum: [H, M, L, N]
+            api_types: [modifiable, read-only]
+        create:
+          input_schema: {}

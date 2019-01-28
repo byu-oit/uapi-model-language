@@ -1,6 +1,6 @@
 
 build: kt_build
-clean: kt_clean
+clean: schema_clean kt_clean
 compile: kt_compile
 test: schema_test kt_test
 deploy: kt_deploy
@@ -20,6 +20,23 @@ kt_test: kt_compile
 kt_deploy: test build
 	cd kotlin && ./mvnw deploy
 
-schema_test:
+schema_clean:
+	rm -rf tmp
+
+tmp:
+	mkdir -p tmp
+
+schema_test: examples_yml
 	npx ajv-cli compile -s json-schema.json
-	npx ajv-cli validate -s json-schema.json -d examples/*.json
+	npx ajv-cli validate -s json-schema.json -d "examples/*.json"
+
+ymlfiles := $(wildcard examples/*.yml)
+
+destfiles := $(patsubst examples/%.yml,examples/%.yml.json,$(ymlfiles))
+
+examples_yml: $(destfiles)
+
+examples/%.yml.json: examples/%.yml
+	npx js-yaml $< > $@
+
+

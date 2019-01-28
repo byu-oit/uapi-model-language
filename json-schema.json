@@ -302,11 +302,13 @@
       "minItems": 1
     },
     "uapi-properties": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/uapi-property"
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9][_a-z0-9][a-z0-9]$": {
+          "$ref": "#/definitions/uapi-property"
+        }
       },
-      "minItems": 1
+      "minProperties": 1
     },
     "uapi-property": {
       "type": "object",
@@ -328,13 +330,9 @@
     "uapi-property-definition": {
       "type": "object",
       "required": [
-        "name",
         "api_types"
       ],
       "properties": {
-        "name": {
-          "$ref": "#/definitions/uapi-property-name"
-        },
         "api_types": {
           "$ref": "#/definitions/uapi-api-types-set"
         },
@@ -718,41 +716,33 @@
     },
     "uapi-list-filters-feature": {
       "type": "object",
-      "required": ["parameters"],
-      "properties": {
-        "parameters": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/uapi-list-filter-parameter"
-          }
-        },
-        "documentation": {
-          "$ref": "#/definitions/uapi-documentation"
-        },
-        "$comment": {
-          "$ref": "#/definitions/uapi-comment"
-        }
-      },
       "patternProperties": {
-        "^x-": {
-          "$ref": "#/definitions/uapi-extension"
+        "^[a-z0-9][._a-z0-9]*[a-z0-9]$": {
+          "$ref": "#/definitions/uapi-list-filter-parameter"
         }
       },
+      "minProperties": 1,
       "additionalProperties": false
+    },
+    "uapi-list-filter-parameters": {
+      "type": "object",
+      "patternProperties": {
+        "^[a-z0-9][._a-z0-9]*[a-z0-9]$": {
+          "$ref": "#/definitions/uapi-list-filter-parameter"
+        }
+      }
     },
     "uapi-list-filter-parameter": {
       "type": "object",
       "required": [
-        "name",
         "type"
       ],
       "properties": {
-        "name": {
-          "type": "string",
-          "pattern": "^[a-z0-9][._a-z0-9]*[a-z0-9]$"
-        },
         "type": {
           "$ref": "#/definitions/uapi-value-type"
+        },
+        "allow_multiple": {
+          "type": "boolean"
         },
         "constraints": {
           "$ref": "#/definitions/uapi-value-constraints"
@@ -798,8 +788,7 @@
       "type": "object",
       "required": [
         "available_sort_properties",
-        "default_sort_properties",
-        "default_sort_order"
+        "default_sort_properties"
       ],
       "properties": {
         "available_sort_properties": {
@@ -873,7 +862,7 @@
         }
       },
       "patternProperties": {
-        "^[a-z0-9][_a-z0-9][a-z0-9]$": {
+        "^[a-z0-9][_a-z0-9]*[a-z0-9]$": {
           "type": "array",
           "items": {
             "$ref": "#/definitions/uapi-property-name"
@@ -895,7 +884,7 @@
         "boolean",
         "date",
         "date-time",
-        "binary-string"
+        "byte-array"
       ]
     },
     "uapi-value-constraints": {
@@ -911,10 +900,10 @@
           "type": "number"
         },
         "exclusiveMaximum": {
-          "type": "number"
+          "type": "boolean"
         },
         "exclusiveMinimum": {
-          "type": "number"
+          "type": "boolean"
         },
         "maxLength": {
           "type": "integer"

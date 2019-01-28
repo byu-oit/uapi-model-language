@@ -2,13 +2,14 @@ package edu.byu.uapi.model
 
 sealed class UAPIResourceModel : UAPIDocumentable, UAPICommentable, UAPIExtensible {
     abstract val type: UAPIResourceType
+    abstract val properties: Map<String, UAPIProperty>
     abstract val subresources: Map<String, UAPISubresourceModel>
 }
 
 data class UAPIListResourceModel(
     val keys: List<String>,
-    val properties: List<UAPIProperty>,
-    val list: UAPIListFeatureModel,
+    override val properties: Map<String, UAPIProperty>,
+    val list: UAPIListFeatureModel? = null,
     val create: UAPICreateMutation? = null,
     val update: UAPIUpdateMutation? = null,
     val delete: UAPIDeleteMutation? = null,
@@ -21,7 +22,7 @@ data class UAPIListResourceModel(
 }
 
 data class UAPISingletonResourceModel(
-    val properties: List<UAPIProperty>,
+    override val properties: Map<String, UAPIProperty>,
     val update: UAPIUpdateMutation? = null,
     val delete: UAPIDeleteMutation? = null,
     override val subresources: Map<String, UAPISubresourceModel> = emptyMap(),

@@ -1,8 +1,8 @@
 package edu.byu.uapi.model
 
 data class UAPIListFilterParameter(
-    val name: String,
     val type: UAPIValueType,
+    val allowMultiple: Boolean = false,
     val constraints: UAPIValueConstraints? = null,
     val supportedOperators: Set<UAPIListFilterOperator>? = null,
     override val documentation: String? = null,

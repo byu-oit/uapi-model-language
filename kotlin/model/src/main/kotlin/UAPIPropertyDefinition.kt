@@ -26,7 +26,7 @@ data class UAPIValuePropertyDefinition(
 ) : UAPIPropertyDefinition()
 
 data class UAPIValueArrayPropertyDefinition(
-    val items: List<UAPIValuePropertyDefinition>,
+    val items: UAPIValuePropertyDefinition,
     val constraints: UAPIArrayConstraints? = null,
     override val `$comment`: String? = null,
     override val extensions: UAPIExtensions = mutableMapOf()

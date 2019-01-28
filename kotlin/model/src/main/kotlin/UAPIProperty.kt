@@ -1,7 +1,6 @@
 package edu.byu.uapi.model
 
 data class UAPIProperty(
-    val name: String,
     val definition: UAPIPropertyDefinition,
     val apiTypes: Set<UAPIApiType>,
     val hasDescription: Boolean = false,

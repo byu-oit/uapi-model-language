@@ -22,8 +22,6 @@ internal interface UAPIPropertyMixin {
     }
 
     data class JsonUAPIProperty(
-        val name: String,
-
         val value: UAPIValuePropertyDefinition?,
         val valueArray: UAPIValueArrayPropertyDefinition?,
         val `object`: UAPIObjectPropertyDefinition?,
@@ -41,8 +39,6 @@ internal interface UAPIPropertyMixin {
         constructor(
             from: UAPIProperty
         ) : this(
-            name = from.name,
-
             value = from.definition.takeIfType(),
             valueArray = from.definition.takeIfType(),
             `object` = from.definition.takeIfType(),
@@ -68,7 +64,6 @@ internal interface UAPIPropertyMixin {
 
         @JsonIgnore
         val unwrapped: UAPIProperty = UAPIProperty(
-            name = name,
             definition = unwrappedDefinition,
             apiTypes = apiTypes,
             hasDescription = hasDescription,

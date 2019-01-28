@@ -11,5 +11,5 @@ enum class UAPIValueType(
     BOOLEAN("boolean"),
     DATE("date"),
     DATE_TIME("date-time"),
-    BINARY_STRING("binary-string");
+    BYTE_ARRAY("byte-array");
 }

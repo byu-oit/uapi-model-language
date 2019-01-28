@@ -2,7 +2,7 @@ package edu.byu.uapi.model
 
 data class UAPIListFeatureModel(
     val subset: UAPIListSubsetFeature? = null,
-    val filters: UAPIListFiltersFeature? = null,
+    val filters: UAPIListFiltersFeature = emptyMap(),
     val sorting: UAPIListSortFeature? = null,
     val search: UAPIListSearchFeature? = null,
     override val documentation: String? = null,

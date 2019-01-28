@@ -11,9 +11,8 @@
       "keys": [
         "rocket_id"
       ],
-      "properties": [
-        {
-          "name": "rocket_id",
+      "properties": {
+        "rocket_id": {
           "value": {
             "type": "string"
           },
@@ -23,7 +22,7 @@
           "has_description": true,
           "nullable": false
         }
-      ],
+      },
       "list": {
         "subset": {
           "max_size": 12,
@@ -36,10 +35,8 @@
           "keys": [
             "sub_id"
           ],
-          "properties": [
-            {
-              "name": "sub_id",
-              "key": true,
+          "properties": {
+            "sub_id": {
               "value": {
                 "type": "int"
               },
@@ -47,15 +44,14 @@
                 "system"
               ]
             }
-          ]
+          }
         }
       }
     },
     "bdfl": {
       "type": "singleton",
-      "properties": [
-        {
-          "name": "name",
+      "properties": {
+        "name": {
           "value": {
             "type": "string"
           },
@@ -63,7 +59,7 @@
             "system"
           ]
         }
-      ]
+      }
     }
   }
 }

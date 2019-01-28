@@ -13,6 +13,8 @@ class UAPIModelModule: SimpleModule(
         context.mixin(UAPIExtensible::class, UAPIExtensibleMixin::class)
         context.mixin(UAPIEnum::class, UAPIEnumMixin::class)
         context.mixin(UAPIProperty::class, UAPIPropertyMixin::class)
+        context.mixin(UAPIResourceModel::class, UAPIResourceModelMixin::class)
+        context.mixin(UAPISubresourceModel::class, UAPISubresourceModelMixin::class)
     }
 
     private fun SetupContext.mixin(
