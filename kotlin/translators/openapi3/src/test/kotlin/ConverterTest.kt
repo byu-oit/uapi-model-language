@@ -5,6 +5,7 @@ import edu.byu.uapi.model.openapi3.toOpenApi3
 import edu.byu.uapi.model.serialization.jackson2.InputFormat
 import edu.byu.uapi.model.serialization.jackson2.readUAPIModelFrom
 import io.swagger.v3.core.jackson.SwaggerModule
+import java.io.File
 import java.nio.file.Paths
 
 fun main() {
@@ -19,7 +20,10 @@ fun main() {
     println(personsModel)
 
     val openApi = personsModel.toOpenApi3()
-    println(om.writerWithDefaultPrettyPrinter().writeValueAsString(openApi))
+    om.writerWithDefaultPrettyPrinter().writeValue(
+        File("gen-persons-openapi3.yml"),
+        openApi
+    )
 }
 
 val persons = Paths.get(System.getProperty("user.dir"), "examples", "persons-v3.yml")

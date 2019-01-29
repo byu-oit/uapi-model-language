@@ -33,7 +33,7 @@ data class UAPIValueArrayPropertyDefinition(
 ) : UAPIPropertyDefinition()
 
 data class UAPIObjectPropertyDefinition(
-    val properties: List<UAPIProperty>,
+    val properties: Map<String, UAPIProperty>,
     override val `$comment`: String? = null,
     override val extensions: UAPIExtensions = mutableMapOf()
 ) : UAPIPropertyDefinition()

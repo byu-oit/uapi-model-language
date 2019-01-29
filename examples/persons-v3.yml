@@ -147,11 +147,53 @@ resources:
     list:
       filters:
         byu_ids:
+          documentation: The person's BYU ID
           type: string
           constraints:
             pattern: '^[0-9]{9}$'
           allow_multiple: true
+        person_ids:
+          documentation: The person's Person ID
+          type: string
+          constraints:
+            pattern: '^\d{3}2\d{4}2$'
+          allow_multiple: true
+        net_ids:
+          documentation: The person's Net ID
+          type: string
+          constraints:
+            pattern: '^[a-z][a-z0-9]{0,8}$'
+          allow_multiple: true
+        credentials.credential_type:
+          documentation: Return people who have a credential of this type
+          type: string
+        credentials.credential_id:
+          documentation: Return people who have a credential with this ID
+          type: string
+        credentials.user_names:
+          documentation: Return people who have a credential with this user name
+          type: string
+          allow_multiple: true
+        email_addresses.email_address:
+          documentation: >-
+            The person's PERSONAL email address. A case-insensitive search is
+            performed.  A wildcard character is automatically appended.
+          type: string # TODO: Add email UAPI type?
+        email_aliases.email_alias:
+          documentation: >-
+            The person's email alias. A case-insensitive search is performed.  A
+            wildcard character is automatically appended.
+          type: string
+        phones.phone_numbers:
+          documentation: >-
+            The person's phone number. A numerics-only search is performed.
+          type: string
+          constraints:
+            pattern: '^(|[0-9(+])[0-9()-./ ]{0,28}[0-9]$'
+          allow_multiple: true
         surname:
+          documentation: >-
+            The person's surname.  A case-insensitive search is performed.
           type: string
           supported_operators: [
             starts_with,
@@ -160,6 +202,119 @@ resources:
             is_null,
             is_empty
           ]
+        rest_of_name:
+          documentation: >-
+            The person's given names.  A case-insensitive search is performed.
+          type: string
+          supported_operators: [
+            starts_with,
+            ends_with,
+            contains,
+            is_null,
+            is_empty
+          ]
+        preferred_surname:
+          documentation: >-
+            The person's preferred surname.  A case-insensitive search is performed.
+          type: string
+          supported_operators: [
+            starts_with,
+            ends_with,
+            contains,
+            is_null,
+            is_empty
+          ]
+        preferred_first_name:
+          documentation: >-
+            The person's preferred first name.  A case-insensitive search is performed.
+          type: string
+          supported_operators: [
+            starts_with,
+            ends_with,
+            contains,
+            is_null,
+            is_empty
+          ]
+        sex:
+          documentation: The person's sex
+          type: string
+          constraints:
+            enum: ['?', F, M, f, m]
+        deceased:
+          documentation: The person's deceased status
+          type: boolean
+        vital_record.marital_status:
+          documentation: The person's marital status
+          type: string
+          constraints:
+            enum:
+              - '?'
+              - D
+              - M
+              - S
+              - W
+              - d
+              - m
+              - s
+              - w
+        personal_record.religion_code:
+          documentation: The person's religion. Validated through the meta/religion service.
+          type: string
+          constraints:
+            pattern: '^([?]{3}|[A-Za-z]{3})$'
+            # TODO: Add 'domain' constraint
+        personal_record.citizenship_country_code:
+          documentation: The person's citizenship. Validated throught the meta/country service.
+          type: string
+          constraints:
+            pattern: '^([?]{3}|[A-Za-z]{3})$'
+        home_town:
+          documentation: The person's home town
+          type: string
+          constraints:
+            maxLength: 30
+            pattern: '^([A-Za-z-]+ )*?[A-Za-z-]+$'
+        home_state_code:
+          documentation: The person's home state. Validated through the meta/state service.
+          type: string
+          constraints:
+            pattern: '^([?]{2}|[A-Za-z]{2,5})$'
+        home_country_code:
+          documentation: The person's home country. Validated through the meta/country service.
+          type: string
+          constraints:
+            pattern: '^([?]{2}|[A-Za-z]{2,5})$'
+        restricted:
+          documentation: The person's FERPA restricted status.
+          type: boolean
+        personal_record.visa_type:
+          documentation: The person's visa type. Validated through the meta/visa_type service
+          type: string
+          constraints:
+            maxLength: 3
+            pattern: '^( |[0-9A-Za-z?-]{1,3})$'
+        employee_summary.employee_role:
+          documentation: The person's employee type in XXX-XX-XXX format.
+          type: string
+          constraints:
+            pattern: >-
+              ^[ACEOPRS][ADEFHMNOT][ACDFHMNPS]-[CFOPST][123BCMT]-[ADLRT][CER][CMTV]$
+        student_summary.student_status:
+          documentation: The person's student status
+          type: string
+        group_memberships.group_ids:
+          documentation: Return people who are members of a group. Group ID must match exactly.
+          type: string
+          constraints:
+            minLength: 1
+          allow_multiple: true
+        groups_administered.group_ids:
+          documentation: Return people who are administrators of a group. Group ID must match exactly.
+          type: string
+          constraints:
+            minLength: 1
+          allow_multiple: true
+
       subset:
         default_size: 100
         max_size: 100
@@ -190,6 +345,12 @@ resources:
           - preferred_name
           - byu_id
         default_sort_order: ascending
+
+    create:
+      input_schema: {}
+    update:
+      input_schema: {}
+    delete: {}
 
     subresources:
       employee_summary:
@@ -288,3 +449,6 @@ resources:
             api_types: [modifiable, read-only]
         create:
           input_schema: {}
+        update:
+          input_schema: {}
+        delete: {}

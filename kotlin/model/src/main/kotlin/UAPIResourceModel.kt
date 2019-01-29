@@ -9,6 +9,7 @@ sealed class UAPIResourceModel : UAPIDocumentable, UAPICommentable, UAPIExtensib
 data class UAPIListResourceModel(
     val keys: List<String>,
     override val properties: Map<String, UAPIProperty>,
+    val singularName: String? = null,
     val list: UAPIListFeatureModel? = null,
     val create: UAPICreateMutation? = null,
     val update: UAPIUpdateMutation? = null,
