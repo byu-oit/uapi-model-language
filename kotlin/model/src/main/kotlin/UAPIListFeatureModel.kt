@@ -9,3 +9,7 @@ data class UAPIListFeatureModel(
     override val `$comment`: String? = null,
     override val extensions: UAPIExtensions = mutableMapOf()
 ): UAPIDocumentable, UAPICommentable, UAPIExtensible
+
+interface UAPIHasListFeature {
+    val list: UAPIListFeatureModel?
+}

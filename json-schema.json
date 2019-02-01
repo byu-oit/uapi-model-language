@@ -136,6 +136,9 @@
         "subresources": {
           "$ref": "#/definitions/uapi-subresources"
         },
+        "claims": {
+          "$ref": "#/definitions/uapi-claims"
+        },
         "$comment": {
           "$ref": "#/definitions/uapi-comment"
         },
@@ -170,6 +173,9 @@
         },
         "subresources": {
           "$ref": "#/definitions/uapi-subresources"
+        },
+        "claims": {
+          "$ref": "#/definitions/uapi-claims"
         },
         "$comment": {
           "$ref": "#/definitions/uapi-comment"
@@ -741,11 +747,11 @@
         "type": {
           "$ref": "#/definitions/uapi-value-type"
         },
-        "allow_multiple": {
-          "type": "boolean"
-        },
         "constraints": {
           "$ref": "#/definitions/uapi-value-constraints"
+        },
+        "allow_multiple": {
+          "type": "boolean"
         },
         "supported_operators": {
           "type": "array",
@@ -931,6 +937,84 @@
         }
       },
       "additionalProperties": false
+    },
+    "uapi-claims": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/definitions/uapi-claim"
+      }
+    },
+    "uapi-claim": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/uapi-value-type"
+        },
+        "constraints": {
+          "$ref": "#/definitions/uapi-value-constraints"
+        },
+        "qualifiers": {
+          "$ref": "#/definitions/uapi-claim-qualifiers"
+        },
+        "relationships": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "$ref": "#/definitions/uapi-claim-relationship"
+          }
+        }
+      }
+    },
+    "uapi-claim-qualifiers": {
+      "additionalProperties": {
+        "$ref": "#/definitions/uapi-claim-qualifier"
+      }
+    },
+    "uapi-claim-qualifier": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "$ref": "#/definitions/uapi-value-type"
+        },
+        "constraints": {
+          "$ref": "#/definitions/uapi-value-constraints"
+        },
+        "allow_multiple": {
+          "type": "boolean"
+        },
+        "default": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "patternProperties": {
+        "^x-": {
+          "$ref": "#/definitions/uapi-extension"
+        }
+      }
+    },
+    "uapi-claim-relationship": {
+      "type": "string",
+      "enum": [
+        "gt_or_eq",
+        "gt",
+        "eq",
+        "not_eq",
+        "lt",
+        "lt_or_eq"
+      ]
     },
     "uapi-resource-type": {
       "description": "Resource Types",

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.parameters.PathParameter
+import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import java.math.BigDecimal
@@ -36,7 +37,107 @@ fun UAPIResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>
     return when (this) {
         is UAPIListResourceModel -> this.toOpenAPI3Paths(name)
         is UAPISingletonResourceModel -> this.toOpenAPI3Paths(name)
+    } + this.getClaimPaths(name)
+}
+
+fun UAPIResourceModel.getClaimPaths(name: String): List<Pair<String, PathItem>> {
+    val claims = this.claims.ifEmpty { return emptyList() }
+    return listOf(
+        "/claims/$name" to claims.toClaimPathItem(name),
+        "/claims/$name/batch" to claims.toBatchClaimPathItem(name)
+    )
+}
+
+fun Map<String, UAPIClaimModel>.toClaimPathItem(name: String): PathItem {
+    return PathItem()
+        .get(Operation())
+        .put(this.toClaimPutOperation(name))
+}
+
+fun Map<String, UAPIClaimModel>.toClaimPutOperation(name: String): Operation {
+    return Operation()
+        .operationId("${name}__claims")
+        .requestBody(
+            RequestBody()
+                .content(
+                    Content()
+                        .addMediaType(
+                            "application/json", MediaType()
+                                .schema(this.toSingleClaimRequestSchema())
+                        )
+                )
+        )
+}
+
+fun Map<String, UAPIClaimModel>.toSingleClaimRequestSchema(): Schema<*> {
+    return ObjectSchema()
+        .properties(
+            mapOf(
+                "subject" to StringSchema(),
+                "mode" to StringSchema()._enum(listOf("ALL", "ANY", "ONE")),
+                "claims" to this.toClaimsSchema()
+            )
+        )
+}
+
+fun Map<String, UAPIClaimModel>.toClaimsSchema(): Schema<*> {
+//    return ObjectSchema()
+//        .properties(mapOf(
+//            "subject" to StringSchema(),
+//            "mode" to StringSchema()._enum(listOf("ALL", "ANY", "ONE")),
+//            "claims" to
+//        ))
+    return ArraySchema().also { a ->
+        a.items = ComposedSchema()
+            .oneOf(
+                this.entries.map { e ->
+                    val key = e.key
+                    val value = e.value
+                    val props = mutableMapOf<String, Schema<*>>(
+                        "concept" to StringSchema().addEnumItem(key),
+                        "relationship" to value.relationships.toOpenAPI3Schema(),
+                        "value" to getValueSchema(value.type, value.constraints)
+                    )
+                    if (value.qualifiers.isNotEmpty()) {
+                        props["qualifiers"] = ObjectSchema().also { qs ->
+                            qs.properties = value.qualifiers.mapValues { e ->
+                                val k = e.key
+                                val v = e.value
+
+                                if (v.allowMultiple) {
+                                    getValueArraySchema(v.type, v.constraints)
+                                } else {
+                                    getValueSchema(v.type, v.constraints)
+                                }.also { it.setDefault(v.default) }
+                            }
+                        }
+                    }
+                    ObjectSchema()
+                        .properties(props)
+                }
+            )
     }
+}
+
+
+/*
+{
+  "subject": "123456789",
+  "mode": "ALL",
+  "claims": [
+    {
+      "concept": "age",
+      "relationship": "greater-than-or-equal",
+      "value": "21",
+      "qualifier": { ageOffset: -5 }
+    }
+  ]
+}
+ */
+
+fun Map<String, UAPIClaimModel>.toBatchClaimPathItem(name: String): PathItem {
+    return PathItem()
+        .put(Operation())
 }
 
 fun UAPIListResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
@@ -446,13 +547,17 @@ fun listSchemaFor(
         root.properties = mapOf(
             // TODO: Better Links
             "links" to ObjectSchema(),
-            "metadata" to ObjectSchema(),
+            "metadata" to listMetadata(),
             "values" to ArraySchema().also { values ->
                 values.default = emptyList<Any>()
                 values.items = itemSchema
             }
         )
     }
+}
+
+private fun listMetadata(): ObjectSchema {
+    return ObjectSchema()
 }
 
 private fun UAPIListResourceModel.getListParameters(name: String): List<Parameter> {

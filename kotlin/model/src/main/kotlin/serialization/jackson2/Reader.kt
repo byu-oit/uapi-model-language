@@ -16,7 +16,6 @@ private val jsonMapper: ObjectMapper by lazy {
 private fun <M : ObjectMapper> M.prepare(): M {
     registerModule(UAPIModelModule())
     registerKotlinModule()
-    disable(SerializationFeature.FAIL_ON_UNWRAPPED_TYPE_IDENTIFIERS)
     setDefaultPropertyInclusion(JsonInclude.Include.NON_DEFAULT)
     propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
     return this

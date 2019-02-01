@@ -314,7 +314,6 @@ resources:
           constraints:
             minLength: 1
           allow_multiple: true
-
       subset:
         default_size: 100
         max_size: 100
@@ -452,3 +451,20 @@ resources:
         update:
           input_schema: {}
         delete: {}
+
+    claims:
+      age:
+        type: string
+        constraints:
+          minimum: 0
+          maximum: 120
+        relationships:
+          - gt_or_eq
+          - gt
+          - eq
+          - lt
+          - lt_or_eq
+          - not_eq
+        qualifiers:
+          as_of_date:
+            type: date
