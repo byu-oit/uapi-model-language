@@ -468,3 +468,18 @@ resources:
         qualifiers:
           as_of_date:
             type: date
+      employee:
+        type: boolean
+        relationships: [eq]
+      full_time_employee:
+        type: boolean
+        relationships: [eq]
+      part_time_employee:
+        type: boolean
+        relationships: [eq]
+      deceased:
+        type: boolean
+        relationships: [eq]
+      member_of_group_id:
+        type: string
+        relationships: [eq, not_eq]

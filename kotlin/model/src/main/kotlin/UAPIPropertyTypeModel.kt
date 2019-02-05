@@ -10,38 +10,38 @@ package edu.byu.uapi.model
 //)
 //@JsonSubTypes(
 //    value = [
-//        JsonSubTypes.Type(UAPIValuePropertyDefinition::class, name = "value"),
-//        JsonSubTypes.Type(UAPIValueArrayPropertyDefinition::class, name = "value_array"),
-//        JsonSubTypes.Type(UAPIObjectPropertyDefinition::class, name = "object"),
-//        JsonSubTypes.Type(UAPIObjectArrayPropertyDefinition::class, name = "object_array")
+//        JsonSubTypes.Type(UAPIValuePropertyTypeModel::class, name = "value"),
+//        JsonSubTypes.Type(UAPIValueArrayPropertyTypeModel::class, name = "value_array"),
+//        JsonSubTypes.Type(UAPIObjectPropertyTypeModel::class, name = "object"),
+//        JsonSubTypes.Type(UAPIObjectArrayPropertyTypeModel::class, name = "object_array")
 //    ]
 //)
-sealed class UAPIPropertyDefinition : UAPICommentable, UAPIExtensible
+sealed class UAPIPropertyTypeModel : UAPICommentable, UAPIExtensible
 
-data class UAPIValuePropertyDefinition(
+data class UAPIValuePropertyTypeModel(
     val type: UAPIValueType,
     val constraints: UAPIValueConstraints? = null,
     override val `$comment`: String? = null,
     override val extensions: UAPIExtensions = mutableMapOf()
-) : UAPIPropertyDefinition()
+) : UAPIPropertyTypeModel()
 
-data class UAPIValueArrayPropertyDefinition(
-    val items: UAPIValuePropertyDefinition,
+data class UAPIValueArrayPropertyTypeModel(
+    val items: UAPIValuePropertyTypeModel,
     val constraints: UAPIArrayConstraints? = null,
     override val `$comment`: String? = null,
     override val extensions: UAPIExtensions = mutableMapOf()
-) : UAPIPropertyDefinition()
+) : UAPIPropertyTypeModel()
 
-data class UAPIObjectPropertyDefinition(
-    val properties: Map<String, UAPIProperty>,
+data class UAPIObjectPropertyTypeModel(
+    val properties: Map<String, UAPIPropertyModel>,
     override val `$comment`: String? = null,
     override val extensions: UAPIExtensions = mutableMapOf()
-) : UAPIPropertyDefinition()
+) : UAPIPropertyTypeModel()
 
 
-data class UAPIObjectArrayPropertyDefinition(
-    val items: UAPIObjectPropertyDefinition,
+data class UAPIObjectArrayPropertyTypeModel(
+    val items: UAPIObjectPropertyTypeModel,
     val constraints: UAPIArrayConstraints? = null,
     override val `$comment`: String? = null,
     override val extensions: UAPIExtensions = mutableMapOf()
-) : UAPIPropertyDefinition()
+) : UAPIPropertyTypeModel()

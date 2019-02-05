@@ -32,7 +32,7 @@ fun Iterable<UAPIListFilterOperator>.toObjectSchema(valueSchema: Schema<*>): Obj
 }
 
 fun UAPIListFilterOperator.toSchema(valueSchema: Schema<*>): Schema<*> {
-    return when(this) {
+    return when (this) {
         STARTS_WITH -> StringSchema()
         ENDS_WITH -> StringSchema()
         CONTAINS -> StringSchema()
@@ -51,7 +51,7 @@ fun UAPIListFilterOperator.toSchema(valueSchema: Schema<*>): Schema<*> {
 }
 
 fun getValueSchema(type: UAPIValueType, constraints: UAPIValueConstraints? = null): Schema<*> {
-    val c= constraints ?: UAPIValueConstraints()
+    val c = constraints ?: UAPIValueConstraints()
     return when (type) {
         INT -> IntegerSchema().apply {
             format("int32")
@@ -114,11 +114,60 @@ fun getValueArraySchema(
     }
 }
 
+fun errorResponse(description: String, code: Int? = null): ApiResponse {
+    return ApiResponse()
+        .description(description)
+        .content(
+            Content()
+                .addMediaType(
+                    "application/json",
+                    MediaType().schema(errorSchema(code))
+                )
+        )
+}
+
+fun errorSchema(code: Int? = null): ObjectSchema {
+    return ObjectSchema().apply {
+        properties = mapOf("metadata" to metadataSchema(statusCode = code))
+    }
+}
+
+fun metadataSchema(
+    additionalMetadata: Map<String, Schema<*>> = emptyMap(),
+    additionalRequired: List<String> = emptyList(),
+    statusCode: Int? = null
+): ObjectSchema {
+    return ObjectSchema().apply {
+        properties = mapOf(
+            "validation_response" to validationResponseSchema(statusCode),
+            "validation_information" to ArraySchema().items(StringSchema()),
+            "cache" to ObjectSchema().addProperties("date-time", StringSchema().format("date-time"))
+        ) + additionalMetadata
+        required(listOf("validation_response", "validation_information") + additionalRequired)
+    }
+}
+
+fun validationResponseSchema(code: Int? = null): ObjectSchema {
+    return ObjectSchema().apply {
+        val codeSchema = IntegerSchema()
+        if (code != null) {
+            codeSchema.addEnumItem(code)
+        }
+        properties = mapOf(
+            "code" to codeSchema,
+            "message" to StringSchema()
+        )
+        required = listOf("code", "message")
+    }
+}
+
 val uapiErrorResponse: ApiResponse = ApiResponse().apply {
     content = Content()
-        .addMediaType("application/json", MediaType()
-            .schema(ObjectSchema()
+        .addMediaType(
+            "application/json", MediaType()
+                .schema(
+                    ObjectSchema()
 
-            )
+                )
         )
 }

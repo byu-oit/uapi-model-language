@@ -1,7 +1,7 @@
 package edu.byu.uapi.model
 
-data class UAPIProperty(
-    val definition: UAPIPropertyDefinition,
+data class UAPIPropertyModel(
+    val type: UAPIPropertyTypeModel,
     val apiTypes: Set<UAPIApiType>,
     val hasDescription: Boolean = false,
     val hasLongDescription: Boolean = false,

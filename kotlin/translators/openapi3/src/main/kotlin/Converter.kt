@@ -50,7 +50,7 @@ fun UAPIResourceModel.getClaimPaths(name: String): List<Pair<String, PathItem>> 
 
 fun Map<String, UAPIClaimModel>.toClaimPathItem(name: String): PathItem {
     return PathItem()
-        .get(Operation())
+        .get(Operation()) //TODO
         .put(this.toClaimPutOperation(name))
 }
 
@@ -119,25 +119,9 @@ fun Map<String, UAPIClaimModel>.toClaimsSchema(): Schema<*> {
     }
 }
 
-
-/*
-{
-  "subject": "123456789",
-  "mode": "ALL",
-  "claims": [
-    {
-      "concept": "age",
-      "relationship": "greater-than-or-equal",
-      "value": "21",
-      "qualifier": { ageOffset: -5 }
-    }
-  ]
-}
- */
-
 fun Map<String, UAPIClaimModel>.toBatchClaimPathItem(name: String): PathItem {
     return PathItem()
-        .put(Operation())
+        .put(Operation()) //TODO
 }
 
 fun UAPIListResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
@@ -225,7 +209,7 @@ fun UAPIListSubresourceModel.getSinglePathItem(
         parameters = parent.params + idParams
         get = sr.toSingleGetOperation(parent, name)
         put = sr.update?.let { c -> Operation() }
-        delete = sr.delete?.let { c -> Operation() }
+        delete = sr.delete?.run { toDeleteOperation(name) }
     }
 }
 
@@ -240,7 +224,7 @@ fun UAPISingletonSubresourceModel.toPathItem(
         parameters = parent.params
         get = sr.toGetOperation(parent, name)
         put = sr.update?.let { c -> Operation() }
-        delete = sr.delete?.let { c -> Operation() }
+        delete = sr.delete?.run { toDeleteOperation(name) }
     }
 }
 
@@ -252,8 +236,8 @@ fun UAPIListResourceModel.getIdPath(): Pair<String, List<PathParameter>> {
             val prop = this.properties.getValue(name)
             p.description = prop.documentation
             p.required = true
-            val defn = prop.definition
-            if (defn !is UAPIValuePropertyDefinition) {
+            val defn = prop.type
+            if (defn !is UAPIValuePropertyTypeModel) {
                 throw IllegalStateException("Key properties must be simple value types. '$name' isn't.")
             }
             p.schema = getValueSchema(defn.type, defn.constraints)
@@ -270,8 +254,8 @@ fun UAPIListSubresourceModel.getIdPath(): Pair<String, List<PathParameter>> {
             val prop = this.properties.getValue(name)
             p.description = prop.documentation
             p.required = true
-            val defn = prop.definition
-            if (defn !is UAPIValuePropertyDefinition) {
+            val defn = prop.type
+            if (defn !is UAPIValuePropertyTypeModel) {
                 throw IllegalStateException("Key properties must be simple value types. '$name' isn't.")
             }
             p.schema = getValueSchema(defn.type, defn.constraints)
@@ -286,7 +270,29 @@ fun UAPIListResourceModel.singlePathItem(resourceName: String, idParams: List<Pa
         it.description = this.documentation
         it.get = this.toSingleGetOperation(resourceName)
         it.put = this.update?.let { u -> Operation() }
-        it.delete = this.delete?.let { d -> Operation() }
+        it.delete = this.delete?.run { toDeleteOperation(resourceName) }
+    }
+}
+
+fun UAPIDeleteMutation.toDeleteOperation(name: String): Operation {
+    return Operation().also { o ->
+        o.operationId = "${name}__delete"
+        o.summary = "Delete $name"
+        o.description = this.documentation
+        o.responses = deleteResponses()
+
+    }
+}
+
+fun deleteResponses(): ApiResponses {
+    return ApiResponses().also { r ->
+        r["204"] = ApiResponse().description("Success")
+        r["403"] = errorResponse("Caller is not allowed to delete this record.", 403)
+        r["409"] = errorResponse(
+            "Unable To Delete\n\nBusiness rules prevent this record from being deleted in its current state.",
+            409
+        )
+        r.default = errorResponse("Generic Error")
     }
 }
 
@@ -304,7 +310,8 @@ fun UAPIListResourceModel.toListOperation(name: String): Operation {
                         "application/json",
                         MediaType().schema(
                             listSchemaFor(
-                                this.listItemModel(this.asSubresourceParent(name))
+                                this.listItemModel(this.asSubresourceParent(name)),
+                                subresources.keys + "basic"
                             )
                         )
                     )
@@ -317,6 +324,7 @@ fun UAPIListResourceModel.toListOperation(name: String): Operation {
 
 fun UAPIListSubresourceModel.toListOperation(parent: SubresourceParent, name: String): Operation {
     val sr = this
+    val list = sr.list
     return Operation().apply {
         summary = "List $name"
         operationId = "${parent.name}__${name}__list"
@@ -329,7 +337,7 @@ fun UAPIListSubresourceModel.toListOperation(parent: SubresourceParent, name: St
                     Content().addMediaType(
                         "application/json",
                         MediaType().schema(
-                            listSchemaFor(sr.toResponseItemSchema(parent))
+                            sr.listSchemaFor(sr.toResponseItemSchema(parent))
                         )
                     )
                 )
@@ -457,12 +465,12 @@ fun UAPISingletonSubresourceModel.toResponseItemSchema(parent: SubresourceParent
     return ObjectSchema().also { it.properties(properties.toSchema(parent.keys)) }
 }
 
-fun Map<String, UAPIProperty>.toSchema(keys: Collection<String> = emptySet()): Map<String, Schema<*>> {
+fun Map<String, UAPIPropertyModel>.toSchema(keys: Collection<String> = emptySet()): Map<String, Schema<*>> {
     return this.mapValues { it.value.toSchema(it.key in keys) }
         .toSortedMap()
 }
 
-private fun UAPIProperty.toSchema(isKey: Boolean): Schema<*> {
+private fun UAPIPropertyModel.toSchema(isKey: Boolean): Schema<*> {
     val props = mutableMapOf<String, Schema<*>>(
         "api_type" to this.apiTypes.toOpenAPI3Schema()
     )
@@ -492,7 +500,7 @@ private fun UAPIProperty.toSchema(isKey: Boolean): Schema<*> {
             .maxLength(30)
     }
 
-    definition.toNameAndSchema().apply {
+    type.toNameAndSchema().apply {
         props[first] = second
     }
 
@@ -513,41 +521,42 @@ private fun UAPIProperty.toSchema(isKey: Boolean): Schema<*> {
     }
 }
 
-fun UAPIPropertyDefinition.toNameAndSchema(): Pair<String, Schema<*>> {
+fun UAPIPropertyTypeModel.toNameAndSchema(): Pair<String, Schema<*>> {
     return when (this) {
-        is UAPIValuePropertyDefinition -> "value" to this.toSchema()
-        is UAPIValueArrayPropertyDefinition -> "value_array" to this.toSchema()
-        is UAPIObjectPropertyDefinition -> "object" to this.toSchema()
-        is UAPIObjectArrayPropertyDefinition -> "object_array" to this.toSchema()
+        is UAPIValuePropertyTypeModel -> "value" to this.toSchema()
+        is UAPIValueArrayPropertyTypeModel -> "value_array" to this.toSchema()
+        is UAPIObjectPropertyTypeModel -> "object" to this.toSchema()
+        is UAPIObjectArrayPropertyTypeModel -> "object_array" to this.toSchema()
     }
 }
 
-fun UAPIValuePropertyDefinition.toSchema(): Schema<*> {
+fun UAPIValuePropertyTypeModel.toSchema(): Schema<*> {
     return getValueSchema(this.type, this.constraints)
 }
 
-fun UAPIValueArrayPropertyDefinition.toSchema(): Schema<*> {
+fun UAPIValueArrayPropertyTypeModel.toSchema(): Schema<*> {
     return getValueArraySchema(this.items.type, this.items.constraints, this.constraints)
 }
 
-fun UAPIObjectPropertyDefinition.toSchema(): Schema<*> {
+fun UAPIObjectPropertyTypeModel.toSchema(): Schema<*> {
     return ObjectSchema().properties(this.properties.toSchema())
 }
 
-fun UAPIObjectArrayPropertyDefinition.toSchema(): Schema<*> {
+fun UAPIObjectArrayPropertyTypeModel.toSchema(): Schema<*> {
     return ArraySchema().also { a ->
         a.items = this.items.toSchema()
     }
 }
 
-fun listSchemaFor(
-    itemSchema: ObjectSchema
+fun UAPIHasListFeature.listSchemaFor(
+    itemSchema: ObjectSchema,
+    fieldsets: Set<String> = emptySet()
 ): ObjectSchema {
     return ObjectSchema().also { root ->
         root.properties = mapOf(
             // TODO: Better Links
             "links" to ObjectSchema(),
-            "metadata" to listMetadata(),
+            "metadata" to listMetadata(fieldsets),
             "values" to ArraySchema().also { values ->
                 values.default = emptyList<Any>()
                 values.items = itemSchema
@@ -556,8 +565,76 @@ fun listSchemaFor(
     }
 }
 
-private fun listMetadata(): ObjectSchema {
-    return ObjectSchema()
+private fun UAPIHasListFeature.listMetadata(fieldsets: Set<String> = emptySet()): ObjectSchema {
+    val list = this.list
+    val meta = mutableMapOf<String, Schema<*>>()
+    val req = mutableListOf<String>()
+
+    meta["collection_size"] = IntegerSchema()
+
+    list?.sorting.ifNotNull { s ->
+        meta["sort_properties_available"] =
+            ArraySchema().also { a ->
+                a.items = StringSchema()._enum(s.availableSortProperties)
+                a.uniqueItems = true
+                a.default = s.availableSortProperties
+            }
+        meta["sort_properties_default"] =
+            ArraySchema().also { a ->
+                a.items = StringSchema()._enum(s.availableSortProperties)
+                a.uniqueItems = true
+                a.default = s.defaultSortProperties
+            }
+        meta["sort_order_default"] = UAPISortOrder.values().toOpenAPI3Schema()
+            ._default(s.defaultSortOrder.apiValue)
+
+        req += listOf("sort_properties_available", "sort_properties_default", "sort_order_default")
+    }
+    list?.subset.ifNotNull { s ->
+        meta["default_subset_size"] = IntegerSchema()._default(s.defaultSize)
+        meta["max_subset_size"] = IntegerSchema()._default(s.maxSize)
+        meta["subset_start"] = IntegerSchema().minimum(BigDecimal.ZERO)
+        meta["subset_size"] = IntegerSchema().minimum(BigDecimal.ZERO).maximum(s.maxSize.toBigDecimal())
+
+        req += listOf("default_subset_size", "max_subset_size", "subset_start", "subset_size")
+    }
+    list?.search.ifNotNull { s ->
+        meta["search_contexts_available"] = ObjectSchema().apply {
+            properties = s.searchContextsAvailable.mapValues {
+                val v = it.value
+                ArraySchema().apply {
+                    items = StringSchema()
+                    default = v
+                } as Schema<*>
+            }.toSortedMap()
+            required = s.searchContextsAvailable.keys.sorted()
+        }
+
+        req += listOf("search_contexts_available")
+    }
+
+    if (fieldsets.isNotEmpty()) {
+        val fl = fieldsets.toList().sorted()
+        val itemSchema = StringSchema()._enum(fl)
+        meta["field_sets_returned"] = ArraySchema().apply {
+            items = itemSchema
+            uniqueItems = true
+        }
+        meta["field_sets_available"] = ArraySchema().apply {
+            items = itemSchema
+            uniqueItems = true
+            default = fieldsets
+        }
+        meta["field_sets_default"] = ArraySchema().apply {
+            items = itemSchema
+            uniqueItems = true
+            default = listOf("basic")
+        }
+
+        req += listOf("field_sets_returned", "field_sets_available", "field_sets_default")
+    }
+
+    return metadataSchema(meta)
 }
 
 private fun UAPIListResourceModel.getListParameters(name: String): List<Parameter> {

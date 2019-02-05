@@ -311,29 +311,29 @@
       "type": "object",
       "patternProperties": {
         "^[a-z0-9][_a-z0-9][a-z0-9]$": {
-          "$ref": "#/definitions/uapi-property"
+          "$ref": "#/definitions/uapi-property-model"
         }
       },
       "minProperties": 1
     },
-    "uapi-property": {
+    "uapi-property-model": {
       "type": "object",
       "oneOf": [
         {
-          "$ref": "#/definitions/uapi-value-property"
+          "$ref": "#/definitions/uapi-value-property-model"
         },
         {
-          "$ref": "#/definitions/uapi-value-array-property"
+          "$ref": "#/definitions/uapi-value-array-property-model"
         },
         {
-          "$ref": "#/definitions/uapi-object-property"
+          "$ref": "#/definitions/uapi-object-property-model"
         },
         {
-          "$ref": "#/definitions/uapi-object-array-property"
+          "$ref": "#/definitions/uapi-object-array-property-model"
         }
       ]
     },
-    "uapi-property-definition": {
+    "uapi-property-model-base": {
       "type": "object",
       "required": [
         "api_types"
@@ -388,11 +388,11 @@
       "type": "string",
       "pattern": "^[a-z0-9][_a-z0-9]*[a-z0-9]$"
     },
-    "uapi-value-property": {
+    "uapi-value-property-model": {
       "type": "object",
       "allOf": [
         {
-          "$ref": "#/definitions/uapi-property-definition"
+          "$ref": "#/definitions/uapi-property-model-base"
         },
         {
           "required": [
@@ -400,7 +400,7 @@
           ],
           "properties": {
             "value": {
-              "$ref": "#/definitions/uapi-value-property-definition"
+              "$ref": "#/definitions/uapi-value-property-type-model"
             },
             "key": {
               "type": "boolean"
@@ -409,7 +409,7 @@
         }
       ]
     },
-    "uapi-value-property-definition": {
+    "uapi-value-property-type-model": {
       "type": "object",
       "required": [
         "type"
@@ -432,10 +432,10 @@
       },
       "additionalProperties": false
     },
-    "uapi-value-array-property": {
+    "uapi-value-array-property-model": {
       "allOf": [
         {
-          "$ref": "#/definitions/uapi-property-definition"
+          "$ref": "#/definitions/uapi-property-model-base"
         },
         {
           "type": "object",
@@ -444,20 +444,20 @@
           ],
           "properties": {
             "value_array": {
-              "$ref": "#/definitions/uapi-value-array-property-definition"
+              "$ref": "#/definitions/uapi-value-array-property-type-model"
             }
           }
         }
       ]
     },
-    "uapi-value-array-property-definition": {
+    "uapi-value-array-property-type-model": {
       "type": "object",
       "required": [
         "items"
       ],
       "properties": {
         "items": {
-          "$ref": "#/definitions/uapi-value-property-definition"
+          "$ref": "#/definitions/uapi-value-property-type-model"
         },
         "constraints": {
           "$ref": "#/definitions/uapi-array-constraints"
@@ -499,11 +499,11 @@
       },
       "additionalProperties": false
     },
-    "uapi-object-property": {
+    "uapi-object-property-model": {
       "type": "object",
       "allOf": [
         {
-          "$ref": "#/definitions/uapi-property-definition"
+          "$ref": "#/definitions/uapi-property-model-base"
         },
         {
           "required": [
@@ -511,13 +511,13 @@
           ],
           "properties": {
             "object": {
-              "$ref": "#/definitions/uapi-object-property-definition"
+              "$ref": "#/definitions/uapi-object-property-type-model"
             }
           }
         }
       ]
     },
-    "uapi-object-property-definition": {
+    "uapi-object-property-type-model": {
       "type": "object",
       "required": [
         "properties"
@@ -537,11 +537,11 @@
       },
       "additionalProperties": false
     },
-    "uapi-object-array-property": {
+    "uapi-object-array-property-model": {
       "type": "object",
       "allOf": [
         {
-          "$ref": "#/definitions/uapi-property-definition"
+          "$ref": "#/definitions/uapi-property-model-base"
         },
         {
           "required": [
@@ -549,20 +549,20 @@
           ],
           "properties": {
             "object_array": {
-              "$ref": "#/definitions/uapi-object-array-property-definition"
+              "$ref": "#/definitions/uapi-object-array-property-type-model"
             }
           }
         }
       ]
     },
-    "uapi-object-array-property-definition": {
+    "uapi-object-array-property-type-model": {
       "type": "object",
       "required": [
         "items"
       ],
       "properties": {
         "items": {
-          "$ref": "#/definitions/uapi-object-property-definition"
+          "$ref": "#/definitions/uapi-object-property-type-model"
         },
         "constraints": {
           "$ref": "#/definitions/uapi-array-constraints"

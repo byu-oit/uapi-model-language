@@ -13,19 +13,19 @@ import edu.byu.uapi.model.*
     converter = UAPIPropertyMixin.InConverter::class
 )
 internal interface UAPIPropertyMixin {
-    class OutConverter : StdConverter<UAPIProperty, JsonUAPIProperty>() {
-        override fun convert(value: UAPIProperty): JsonUAPIProperty = JsonUAPIProperty(value)
+    class OutConverter : StdConverter<UAPIPropertyModel, JsonUAPIProperty>() {
+        override fun convert(value: UAPIPropertyModel): JsonUAPIProperty = JsonUAPIProperty(value)
     }
 
-    class InConverter : StdConverter<JsonUAPIProperty, UAPIProperty>() {
-        override fun convert(value: JsonUAPIProperty): UAPIProperty = value.unwrapped
+    class InConverter : StdConverter<JsonUAPIProperty, UAPIPropertyModel>() {
+        override fun convert(value: JsonUAPIProperty): UAPIPropertyModel = value.unwrapped
     }
 
     data class JsonUAPIProperty(
-        val value: UAPIValuePropertyDefinition?,
-        val valueArray: UAPIValueArrayPropertyDefinition?,
-        val `object`: UAPIObjectPropertyDefinition?,
-        val objectArray: UAPIObjectArrayPropertyDefinition?,
+        val value: UAPIValuePropertyTypeModel?,
+        val valueArray: UAPIValueArrayPropertyTypeModel?,
+        val `object`: UAPIObjectPropertyTypeModel?,
+        val objectArray: UAPIObjectArrayPropertyTypeModel?,
 
         val apiTypes: Set<UAPIApiType>,
         val hasDescription: Boolean = false,
@@ -37,12 +37,12 @@ internal interface UAPIPropertyMixin {
         override val extensions: UAPIExtensions = mutableMapOf()
     ) : UAPIDocumentable, UAPICommentable, UAPIExtensible {
         constructor(
-            from: UAPIProperty
+            from: UAPIPropertyModel
         ) : this(
-            value = from.definition.takeIfType(),
-            valueArray = from.definition.takeIfType(),
-            `object` = from.definition.takeIfType(),
-            objectArray = from.definition.takeIfType(),
+            value = from.type.takeIfType(),
+            valueArray = from.type.takeIfType(),
+            `object` = from.type.takeIfType(),
+            objectArray = from.type.takeIfType(),
 
             apiTypes = from.apiTypes,
             hasDescription = from.hasDescription,
@@ -55,7 +55,7 @@ internal interface UAPIPropertyMixin {
         )
 
         @JsonIgnore
-        private val unwrappedDefinition = listOfNotNull(
+        private val unwrappedType = listOfNotNull(
             value, valueArray, `object`, objectArray
         ).singleOrNull() ?: throw UAPIModelException(
             "[property]",
@@ -63,8 +63,8 @@ internal interface UAPIPropertyMixin {
         )
 
         @JsonIgnore
-        val unwrapped: UAPIProperty = UAPIProperty(
-            definition = unwrappedDefinition,
+        val unwrapped: UAPIPropertyModel = UAPIPropertyModel(
+            type = unwrappedType,
             apiTypes = apiTypes,
             hasDescription = hasDescription,
             hasLongDescription = hasLongDescription,

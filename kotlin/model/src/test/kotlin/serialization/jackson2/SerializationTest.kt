@@ -7,13 +7,13 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
 import edu.byu.uapi.model.UAPIApiType
-import edu.byu.uapi.model.UAPIProperty
-import edu.byu.uapi.model.UAPIValuePropertyDefinition
+import edu.byu.uapi.model.UAPIPropertyModel
+import edu.byu.uapi.model.UAPIValuePropertyTypeModel
 import edu.byu.uapi.model.UAPIValueType
 
 fun main() {
-    val prop = UAPIProperty(
-        definition = UAPIValuePropertyDefinition(
+    val prop = UAPIPropertyModel(
+        type = UAPIValuePropertyTypeModel(
             UAPIValueType.BIG_DECIMAL
         ),
         apiTypes = setOf(UAPIApiType.SYSTEM),
@@ -32,7 +32,7 @@ fun main() {
 
     println(json)
 
-    val read = om.readValue<UAPIProperty>(json)
+    val read = om.readValue<UAPIPropertyModel>(json)
     println(read)
     println(read.extensions)
 }
