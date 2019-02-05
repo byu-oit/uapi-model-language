@@ -3,7 +3,7 @@ build: kt_build
 clean: schema_clean kt_clean
 compile: kt_compile
 test: schema_test kt_test
-deploy: kt_deploy
+deploy: schema_test kt_deploy
 
 kt_build:
 	cd kotlin && ./mvnw install
