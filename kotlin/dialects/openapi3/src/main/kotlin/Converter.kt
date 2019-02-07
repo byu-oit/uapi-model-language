@@ -14,7 +14,7 @@ import io.swagger.v3.oas.models.responses.ApiResponses
 import java.math.BigDecimal
 import kotlin.reflect.KClass
 
-fun UAPIModel.toOpenApi3(): OpenAPI {
+internal fun UAPIModel.toOpenApi3(): OpenAPI {
     return OpenAPI().also {
         it.info = info.toOpenApi3()
         resources.toOpenAPI3Paths()
@@ -22,25 +22,25 @@ fun UAPIModel.toOpenApi3(): OpenAPI {
     }
 }
 
-fun UAPIInfo.toOpenApi3(): Info {
+internal fun UAPIInfo.toOpenApi3(): Info {
     return Info().also {
         it.title = name
         it.version = version
     }
 }
 
-fun Map<String, UAPIResourceModel>.toOpenAPI3Paths(): List<Pair<String, PathItem>> {
+internal fun Map<String, UAPIResourceModel>.toOpenAPI3Paths(): List<Pair<String, PathItem>> {
     return this.flatMap { it.value.toOpenAPI3Paths(it.key) }.sortedBy { it.first }
 }
 
-fun UAPIResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
+internal fun UAPIResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
     return when (this) {
         is UAPIListResourceModel -> this.toOpenAPI3Paths(name)
         is UAPISingletonResourceModel -> this.toOpenAPI3Paths(name)
     } + this.getClaimPaths(name)
 }
 
-fun UAPIResourceModel.getClaimPaths(name: String): List<Pair<String, PathItem>> {
+internal fun UAPIResourceModel.getClaimPaths(name: String): List<Pair<String, PathItem>> {
     val claims = this.claims.ifEmpty { return emptyList() }
     return listOf(
         "/claims/$name" to claims.toClaimPathItem(name),
@@ -48,13 +48,13 @@ fun UAPIResourceModel.getClaimPaths(name: String): List<Pair<String, PathItem>> 
     )
 }
 
-fun Map<String, UAPIClaimModel>.toClaimPathItem(name: String): PathItem {
+internal fun Map<String, UAPIClaimModel>.toClaimPathItem(name: String): PathItem {
     return PathItem()
         .get(Operation()) //TODO
         .put(this.toClaimPutOperation(name))
 }
 
-fun Map<String, UAPIClaimModel>.toClaimPutOperation(name: String): Operation {
+internal fun Map<String, UAPIClaimModel>.toClaimPutOperation(name: String): Operation {
     return Operation()
         .operationId("${name}__claims")
         .requestBody(
@@ -69,7 +69,7 @@ fun Map<String, UAPIClaimModel>.toClaimPutOperation(name: String): Operation {
         )
 }
 
-fun Map<String, UAPIClaimModel>.toSingleClaimRequestSchema(): Schema<*> {
+internal fun Map<String, UAPIClaimModel>.toSingleClaimRequestSchema(): Schema<*> {
     return ObjectSchema()
         .properties(
             mapOf(
@@ -80,7 +80,7 @@ fun Map<String, UAPIClaimModel>.toSingleClaimRequestSchema(): Schema<*> {
         )
 }
 
-fun Map<String, UAPIClaimModel>.toClaimsSchema(): Schema<*> {
+internal fun Map<String, UAPIClaimModel>.toClaimsSchema(): Schema<*> {
 //    return ObjectSchema()
 //        .properties(mapOf(
 //            "subject" to StringSchema(),
@@ -119,12 +119,12 @@ fun Map<String, UAPIClaimModel>.toClaimsSchema(): Schema<*> {
     }
 }
 
-fun Map<String, UAPIClaimModel>.toBatchClaimPathItem(name: String): PathItem {
+internal fun Map<String, UAPIClaimModel>.toBatchClaimPathItem(name: String): PathItem {
     return PathItem()
         .put(Operation()) //TODO
 }
 
-fun UAPIListResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
+internal fun UAPIListResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
     val parent = asSubresourceParent(name)
     return listOf(
         "/$name" to this.listPathItem(name),
@@ -134,7 +134,7 @@ fun UAPIListResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathI
     }
 }
 
-fun UAPIListResourceModel.asSubresourceParent(name: String): SubresourceParent {
+internal fun UAPIListResourceModel.asSubresourceParent(name: String): SubresourceParent {
     val (idPath, idParams) = this.getIdPath()
     return SubresourceParent(name, "/$name/$idPath", idParams, keys)
 }
@@ -149,7 +149,7 @@ private fun UAPISubresourceModel.toOpenAPI3Paths(
     }
 }
 
-fun UAPIListSubresourceModel.toOpenAPI3Paths(
+internal fun UAPIListSubresourceModel.toOpenAPI3Paths(
     parent: SubresourceParent,
     name: String
 ): Map<String, PathItem> {
@@ -161,7 +161,7 @@ fun UAPIListSubresourceModel.toOpenAPI3Paths(
     )
 }
 
-fun UAPISingletonSubresourceModel.toOpenAPI3Paths(
+internal fun UAPISingletonSubresourceModel.toOpenAPI3Paths(
     parent: SubresourceParent,
     name: String
 ): Map<String, PathItem> {
@@ -171,7 +171,7 @@ fun UAPISingletonSubresourceModel.toOpenAPI3Paths(
 }
 
 
-fun UAPIListResourceModel.listPathItem(name: String): PathItem {
+internal fun UAPIListResourceModel.listPathItem(name: String): PathItem {
     return PathItem().also {
         it.description = this.documentation
         it.get = this.toListOperation(name)
@@ -186,7 +186,7 @@ data class SubresourceParent(
     val keys: Collection<String>
 )
 
-fun UAPIListSubresourceModel.getListPathItem(parent: SubresourceParent, name: String): PathItem {
+internal fun UAPIListSubresourceModel.getListPathItem(parent: SubresourceParent, name: String): PathItem {
     val sr = this
     return PathItem().apply {
         description = sr.documentation
@@ -197,7 +197,7 @@ fun UAPIListSubresourceModel.getListPathItem(parent: SubresourceParent, name: St
     }
 }
 
-fun UAPIListSubresourceModel.getSinglePathItem(
+internal fun UAPIListSubresourceModel.getSinglePathItem(
     parent: SubresourceParent,
     idParams: List<PathParameter>,
     name: String
@@ -213,7 +213,7 @@ fun UAPIListSubresourceModel.getSinglePathItem(
     }
 }
 
-fun UAPISingletonSubresourceModel.toPathItem(
+internal fun UAPISingletonSubresourceModel.toPathItem(
     parent: SubresourceParent,
     name: String
 ): PathItem {
@@ -228,7 +228,7 @@ fun UAPISingletonSubresourceModel.toPathItem(
     }
 }
 
-fun UAPIListResourceModel.getIdPath(): Pair<String, List<PathParameter>> {
+internal fun UAPIListResourceModel.getIdPath(): Pair<String, List<PathParameter>> {
     val path = this.keys.joinToString(prefix = "{", separator = "},{", postfix = "}")
     val params = this.keys.map { name ->
         PathParameter().also { p ->
@@ -246,7 +246,7 @@ fun UAPIListResourceModel.getIdPath(): Pair<String, List<PathParameter>> {
     return path to params
 }
 
-fun UAPIListSubresourceModel.getIdPath(): Pair<String, List<PathParameter>> {
+internal fun UAPIListSubresourceModel.getIdPath(): Pair<String, List<PathParameter>> {
     val path = this.keys.joinToString(prefix = "{", separator = "},{", postfix = "}")
     val params = this.keys.map { name ->
         PathParameter().also { p ->
@@ -264,7 +264,7 @@ fun UAPIListSubresourceModel.getIdPath(): Pair<String, List<PathParameter>> {
     return path to params
 }
 
-fun UAPIListResourceModel.singlePathItem(resourceName: String, idParams: List<PathParameter>): PathItem {
+internal fun UAPIListResourceModel.singlePathItem(resourceName: String, idParams: List<PathParameter>): PathItem {
     return PathItem().also {
         it.parameters = idParams
         it.description = this.documentation
@@ -274,7 +274,7 @@ fun UAPIListResourceModel.singlePathItem(resourceName: String, idParams: List<Pa
     }
 }
 
-fun UAPIDeleteMutation.toDeleteOperation(name: String): Operation {
+internal fun UAPIDeleteMutation.toDeleteOperation(name: String): Operation {
     return Operation().also { o ->
         o.operationId = "${name}__delete"
         o.summary = "Delete $name"
@@ -284,7 +284,7 @@ fun UAPIDeleteMutation.toDeleteOperation(name: String): Operation {
     }
 }
 
-fun deleteResponses(): ApiResponses {
+internal fun deleteResponses(): ApiResponses {
     return ApiResponses().also { r ->
         r["204"] = ApiResponse().description("Success")
         r["403"] = errorResponse("Caller is not allowed to delete this record.", 403)
@@ -296,7 +296,7 @@ fun deleteResponses(): ApiResponses {
     }
 }
 
-fun UAPIListResourceModel.toListOperation(name: String): Operation {
+internal fun UAPIListResourceModel.toListOperation(name: String): Operation {
     return Operation().also { op ->
         op.summary = "Gets a list of $name"
         op.description = this.list?.documentation
@@ -322,7 +322,7 @@ fun UAPIListResourceModel.toListOperation(name: String): Operation {
 }
 
 
-fun UAPIListSubresourceModel.toListOperation(parent: SubresourceParent, name: String): Operation {
+internal fun UAPIListSubresourceModel.toListOperation(parent: SubresourceParent, name: String): Operation {
     val sr = this
     val list = sr.list
     return Operation().apply {
@@ -346,7 +346,7 @@ fun UAPIListSubresourceModel.toListOperation(parent: SubresourceParent, name: St
     }
 }
 
-fun UAPIListResourceModel.toSingleGetOperation(name: String): Operation {
+internal fun UAPIListResourceModel.toSingleGetOperation(name: String): Operation {
     val singleName = when {
         singularName != null -> singularName
         name.endsWith("s") -> name.substring(0, name.length - 1)
@@ -374,7 +374,7 @@ fun UAPIListResourceModel.toSingleGetOperation(name: String): Operation {
     }
 }
 
-fun UAPIListSubresourceModel.toSingleGetOperation(parent: SubresourceParent, name: String): Operation {
+internal fun UAPIListSubresourceModel.toSingleGetOperation(parent: SubresourceParent, name: String): Operation {
     val singleName = when {
         singularName != null -> singularName
         name.endsWith("s") -> name.substring(0, name.length - 1)
@@ -400,7 +400,7 @@ fun UAPIListSubresourceModel.toSingleGetOperation(parent: SubresourceParent, nam
     }
 }
 
-fun UAPISingletonSubresourceModel.toGetOperation(
+internal fun UAPISingletonSubresourceModel.toGetOperation(
     parent: SubresourceParent,
     name: String
 ): Operation {
@@ -423,7 +423,7 @@ fun UAPISingletonSubresourceModel.toGetOperation(
     }
 }
 
-fun UAPIListResourceModel.listItemModel(parent: SubresourceParent): ObjectSchema {
+internal fun UAPIListResourceModel.listItemModel(parent: SubresourceParent): ObjectSchema {
     val res = this
     return ObjectSchema().apply {
         additionalProperties = false
@@ -435,37 +435,37 @@ fun UAPIListResourceModel.listItemModel(parent: SubresourceParent): ObjectSchema
     }
 }
 
-fun UAPIResourceModel.toResponseItemSchema(): Schema<*> {
+internal fun UAPIResourceModel.toResponseItemSchema(): Schema<*> {
     return when (this) {
         is UAPIListResourceModel -> this.toResponseItemSchema()
         is UAPISingletonResourceModel -> this.toResponseItemSchema()
     }
 }
 
-fun UAPIListResourceModel.toResponseItemSchema(): Schema<*> {
+internal fun UAPIListResourceModel.toResponseItemSchema(): Schema<*> {
     return ObjectSchema().properties(this.properties.toSchema(this.keys))
 }
 
-fun UAPISingletonResourceModel.toResponseItemSchema(): Schema<*> {
+internal fun UAPISingletonResourceModel.toResponseItemSchema(): Schema<*> {
     return ObjectSchema().properties(this.properties.toSchema())
 }
 
-fun UAPISubresourceModel.toResponseItemSchema(parent: SubresourceParent): ObjectSchema {
+internal fun UAPISubresourceModel.toResponseItemSchema(parent: SubresourceParent): ObjectSchema {
     return when (this) {
         is UAPIListSubresourceModel -> this.toResponseItemSchema(parent)
         is UAPISingletonSubresourceModel -> this.toResponseItemSchema(parent)
     }
 }
 
-fun UAPIListSubresourceModel.toResponseItemSchema(parent: SubresourceParent): ObjectSchema {
+internal fun UAPIListSubresourceModel.toResponseItemSchema(parent: SubresourceParent): ObjectSchema {
     return ObjectSchema().also { it.properties(properties.toSchema(keys + parent.keys)) }
 }
 
-fun UAPISingletonSubresourceModel.toResponseItemSchema(parent: SubresourceParent): ObjectSchema {
+internal fun UAPISingletonSubresourceModel.toResponseItemSchema(parent: SubresourceParent): ObjectSchema {
     return ObjectSchema().also { it.properties(properties.toSchema(parent.keys)) }
 }
 
-fun Map<String, UAPIPropertyModel>.toSchema(keys: Collection<String> = emptySet()): Map<String, Schema<*>> {
+internal fun Map<String, UAPIPropertyModel>.toSchema(keys: Collection<String> = emptySet()): Map<String, Schema<*>> {
     return this.mapValues { it.value.toSchema(it.key in keys) }
         .toSortedMap()
 }
@@ -521,7 +521,7 @@ private fun UAPIPropertyModel.toSchema(isKey: Boolean): Schema<*> {
     }
 }
 
-fun UAPIPropertyTypeModel.toNameAndSchema(): Pair<String, Schema<*>> {
+internal fun UAPIPropertyTypeModel.toNameAndSchema(): Pair<String, Schema<*>> {
     return when (this) {
         is UAPIValuePropertyTypeModel -> "value" to this.toSchema()
         is UAPIValueArrayPropertyTypeModel -> "value_array" to this.toSchema()
@@ -530,25 +530,25 @@ fun UAPIPropertyTypeModel.toNameAndSchema(): Pair<String, Schema<*>> {
     }
 }
 
-fun UAPIValuePropertyTypeModel.toSchema(): Schema<*> {
+internal fun UAPIValuePropertyTypeModel.toSchema(): Schema<*> {
     return getValueSchema(this.type, this.constraints)
 }
 
-fun UAPIValueArrayPropertyTypeModel.toSchema(): Schema<*> {
+internal fun UAPIValueArrayPropertyTypeModel.toSchema(): Schema<*> {
     return getValueArraySchema(this.items.type, this.items.constraints, this.constraints)
 }
 
-fun UAPIObjectPropertyTypeModel.toSchema(): Schema<*> {
+internal fun UAPIObjectPropertyTypeModel.toSchema(): Schema<*> {
     return ObjectSchema().properties(this.properties.toSchema())
 }
 
-fun UAPIObjectArrayPropertyTypeModel.toSchema(): Schema<*> {
+internal fun UAPIObjectArrayPropertyTypeModel.toSchema(): Schema<*> {
     return ArraySchema().also { a ->
         a.items = this.items.toSchema()
     }
 }
 
-fun UAPIHasListFeature.listSchemaFor(
+internal fun UAPIHasListFeature.listSchemaFor(
     itemSchema: ObjectSchema,
     fieldsets: Set<String> = emptySet()
 ): ObjectSchema {
@@ -645,14 +645,14 @@ private fun UAPIListSubresourceModel.getListParameters(name: String): List<Param
     return list?.getListParameters().orEmpty()
 }
 
-fun UAPIListFeatureModel.getListParameters(): List<Parameter> {
+internal fun UAPIListFeatureModel.getListParameters(): List<Parameter> {
     return filters.getListParameters() +
             sorting?.getListParameters().orEmpty() +
             subset?.getListParameters().orEmpty() +
             search?.getListParameters().orEmpty()
 }
 
-fun UAPIListFiltersFeature.getListParameters(): List<Parameter> {
+internal fun UAPIListFiltersFeature.getListParameters(): List<Parameter> {
     return this.map {
         val (key, param) = it
         Parameter().apply {
@@ -680,7 +680,7 @@ fun UAPIListFiltersFeature.getListParameters(): List<Parameter> {
     }
 }
 
-fun UAPIListSortFeature.getListParameters(): List<Parameter> {
+internal fun UAPIListSortFeature.getListParameters(): List<Parameter> {
     val sortProperty = Parameter().also { p ->
         p.name = "sort_properties"
         p.`in` = "query"
@@ -701,7 +701,7 @@ fun UAPIListSortFeature.getListParameters(): List<Parameter> {
     return listOf(sortProperty, sortOrder)
 }
 
-fun UAPIListSubsetFeature.getListParameters(): List<Parameter> {
+internal fun UAPIListSubsetFeature.getListParameters(): List<Parameter> {
     val startOffset = Parameter().also { p ->
         p.name = "subset_start_offset"
         p.`in` = "query"
@@ -728,7 +728,7 @@ fun UAPIListSubsetFeature.getListParameters(): List<Parameter> {
     return listOf(startOffset, size)
 }
 
-fun UAPIListSearchFeature.getListParameters(): List<Parameter> {
+internal fun UAPIListSearchFeature.getListParameters(): List<Parameter> {
     val context = Parameter().also { p ->
         p.name = "search_context"
         p.`in` = "query"
@@ -759,7 +759,7 @@ fun UAPIListSearchFeature.getListParameters(): List<Parameter> {
     return listOf(context, text)
 }
 
-fun UAPIResourceModel.getFieldsetParameters(): List<Parameter> {
+internal fun UAPIResourceModel.getFieldsetParameters(): List<Parameter> {
     val keys = listOf("basic") + this.subresources.keys.sorted()
     return listOf(Parameter().apply {
         name = "field_sets"
@@ -776,7 +776,7 @@ fun UAPIResourceModel.getFieldsetParameters(): List<Parameter> {
     // TODO: Contexts
 }
 
-fun UAPISingletonResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
+internal fun UAPISingletonResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, PathItem>> {
     return emptyList()
 }
 

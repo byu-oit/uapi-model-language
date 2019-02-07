@@ -23,6 +23,12 @@
             <artifactId>uapi-model</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <optional>true</optional>
+        </dependency>
+
         <!-- OpenAPI3 -->
         <dependency>
             <groupId>io.swagger.core.v3</groupId>

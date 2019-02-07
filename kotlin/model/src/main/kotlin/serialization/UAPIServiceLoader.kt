@@ -1,4 +1,4 @@
-package serialization
+package edu.byu.uapi.model.serialization
 
 import java.util.*
 import kotlin.reflect.KClass

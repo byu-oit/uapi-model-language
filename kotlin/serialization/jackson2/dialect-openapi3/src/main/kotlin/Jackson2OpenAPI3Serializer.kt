@@ -1,13 +1,9 @@
 package edu.byu.uapi.model.serialization.jackson2
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
 import com.google.auto.service.AutoService
-import edu.byu.uapi.model.UAPIModel
 import edu.byu.uapi.model.openapi3.serialization.OpenAPI3Reader
 import edu.byu.uapi.model.openapi3.serialization.OpenAPI3Writer
-import edu.byu.uapi.model.serialization.UAPIModelReader
-import edu.byu.uapi.model.serialization.UAPIModelWriter
 import edu.byu.uapi.model.serialization.jackson2.common.SerializerBase
 import io.swagger.v3.core.jackson.SwaggerModule
 import io.swagger.v3.oas.models.OpenAPI

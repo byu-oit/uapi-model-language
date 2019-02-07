@@ -8,11 +8,11 @@ import com.fasterxml.jackson.databind.SerializationFeature
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.fasterxml.jackson.module.afterburner.AfterburnerModule
 import com.fasterxml.jackson.module.kotlin.registerKotlinModule
+import edu.byu.uapi.model.serialization.UAPIReader
 import edu.byu.uapi.model.serialization.UAPISerializationFormat
 import edu.byu.uapi.model.serialization.UAPISerializationFormat.JSON
 import edu.byu.uapi.model.serialization.UAPISerializationFormat.YAML
-import serialization.UAPIReader
-import serialization.UAPIWriter
+import edu.byu.uapi.model.serialization.UAPIWriter
 import java.io.Reader
 import java.io.Writer
 import kotlin.reflect.KClass

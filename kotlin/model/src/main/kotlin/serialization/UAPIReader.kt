@@ -1,6 +1,5 @@
-package serialization
+package edu.byu.uapi.model.serialization
 
-import edu.byu.uapi.model.serialization.UAPISerializationFormat
 import java.io.Reader
 import java.io.StringReader
 
