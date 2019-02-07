@@ -2,7 +2,6 @@ package edu.byu.uapi.model.serialization.jackson2
 
 import com.fasterxml.jackson.databind.module.SimpleModule
 import edu.byu.uapi.model.*
-import serialization.jackson2.UAPIEnumMixin
 import kotlin.reflect.KClass
 
 class UAPIModelModule: SimpleModule(

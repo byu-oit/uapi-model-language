@@ -1,4 +1,4 @@
-package serialization.jackson2
+package edu.byu.uapi.model.serialization.jackson2
 
 import com.fasterxml.jackson.annotation.JsonValue
 import edu.byu.uapi.model.UAPIEnum

@@ -4,42 +4,35 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>uapi-model-translator-openapi3</artifactId>
+    <artifactId>uapi-model-serialization-jackson2</artifactId>
 
-    <name>Kotlin UAPI Model</name>
+    <name>UAPI Model Jackson 2 Serialization</name>
 
     <parent>
-        <groupId>edu.byu.uapi.kotlin</groupId>
-        <artifactId>uapi-model-pom</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
-        <relativePath>../../pom.xml</relativePath>
+        <groupId>edu.byu.uapi.model.serialization</groupId>
+        <artifactId>uapi-model-serialization-jackson2-pom</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
     </parent>
 
     <properties>
         <jackson2.version>2.9.8</jackson2.version>
-        <swagger3.version>2.0.6</swagger3.version>
-
-        <dependencies.checkUnused>false</dependencies.checkUnused>
     </properties>
 
     <dependencies>
-
         <dependency>
-            <groupId>${project.groupId}</groupId>
+            <groupId>edu.byu.uapi.model</groupId>
             <artifactId>uapi-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>edu.byu.uapi.model.serialization</groupId>
+            <artifactId>uapi-serialization-jackson2-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
-        <!-- OpenAPI3 -->
         <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-models</artifactId>
-            <version>${swagger3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-core</artifactId>
-            <version>${swagger3.version}</version>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <optional>true</optional>
         </dependency>
 
         <!-- Kotlin -->
@@ -48,45 +41,27 @@
             <artifactId>kotlin-stdlib</artifactId>
             <version>${kotlin.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk7</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jetbrains.kotlin</groupId>
-            <artifactId>kotlin-stdlib-jdk8</artifactId>
-            <version>${kotlin.version}</version>
-        </dependency>
+
+        <!-- Jackson! -->
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>${jackson2.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>${jackson2.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>${jackson2.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
-            <version>${jackson2.version}</version>
-            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>${jackson2.version}</version>
-            <optional>true</optional>
         </dependency>
 
         <!-- Test -->

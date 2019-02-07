@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>edu.byu.uapi.model.serialization</groupId>
+    <artifactId>uapi-model-serialization-pom</artifactId>
+    <packaging>pom</packaging>
+
+    <name>UAPI Model Serialization Parent POM</name>
+
+    <parent>
+        <groupId>edu.byu.uapi.model</groupId>
+        <artifactId>uapi-model-pom</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <modules>
+        <module>jackson2</module>
+    </modules>
+
+    <properties>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>edu.byu.uapi.model</groupId>
+                <artifactId>uapi-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>edu.byu.uapi.model.dialects</groupId>
+                <artifactId>uapi-model-dialect-openapi3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.google.auto.service</groupId>
+                <artifactId>auto-service</artifactId>
+                <version>1.0-rc4</version>
+                <optional>true</optional>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>
