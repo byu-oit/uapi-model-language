@@ -402,9 +402,7 @@ resources:
               description: 'Generational suffix for name: Roman Numeral, JR, SR, Jr, or Sr'
               maxLength: 10
               minLength: 1
-              pattern: >-
-                ^(
-                |Sr|SR|JR|Jr|M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))$
+              pattern: "^( |Sr|SR|JR|Jr|M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))$"
               type: string
             surname:
               description: required if not updating from PRO

@@ -36,7 +36,7 @@ data class Schema(
     val properties: Map<String, Schema> = emptyMap(),
     val patternProperties: Map<String, Schema> = emptyMap(),
     val dependencies: Map<String, Dependency> = emptyMap(),
-    val propertyNames: Schema? = null, //TODO?
+    val propertyNames: Schema? = null,
     val const: Any? = null,
     val enum: Set<Any> = emptySet(),
     val type: OneOrManyUnique<SimpleType>? = null,
