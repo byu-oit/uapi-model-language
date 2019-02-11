@@ -346,9 +346,142 @@ resources:
         default_sort_order: ascending
 
     create:
-      input_schema: {}
+      input:
+        application/json:
+          type: object
+          properties:
+            created_by_byu_id:
+              pattern: '^( |[0-9A-Z]{1,9})$'
+              type: string
+            created_datetime:
+              format: date-time
+              type: string
+            first_name:
+              description: required if not updating from PRO
+              maxLength: 40
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            home_country_code:
+              default: '???'
+              pattern: '^([?]{3}|[A-Z]{2,3})$'
+              type: string
+            home_state_code:
+              default: '??'
+              pattern: '^([?]{2}|[A-Z]{2,5})$'
+              type: string
+            home_town:
+              default: ' '
+              maxLength: 30
+              pattern: '^( |(?=.*?[A-Z])([A-Za-z-]+ )*?[A-Za-z-]+)$'
+              type: string
+            middle_name:
+              maxLength: 40
+              pattern: '^( |(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+)$'
+              type: string
+            person_id:
+              description: only included if updating from PRO
+              maxLength: 9
+              type: string
+            preferred_first_name:
+              maxLength: 25
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            preferred_surname:
+              maxLength: 40
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            sex:
+              default: '?'
+              enum:
+                - '?'
+                - F
+                - M
+              type: string
+            suffix:
+              default: ' '
+              description: 'Generational suffix for name: Roman Numeral, JR, SR, Jr, or Sr'
+              maxLength: 10
+              minLength: 1
+              pattern: >-
+                ^(
+                |Sr|SR|JR|Jr|M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))$
+              type: string
+            surname:
+              description: required if not updating from PRO
+              maxLength: 40
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            updated_by_byu_id:
+              pattern: '^( |[0-9A-Z]{1,9})$'
+              type: string
+            updated_datetime:
+              format: date-time
+              type: string
+
     update:
-      input_schema: {}
+      input:
+        application/json:
+          properties:
+            first_name:
+              maxLength: 40
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            home_country_code:
+              default: '???'
+              pattern: '^([?]{3}|[A-Z]{2,3})$'
+              type: string
+            home_state_code:
+              default: '??'
+              pattern: '^([?]{2}|[A-Z]{2,5})$'
+              type: string
+            home_town:
+              default: ' '
+              maxLength: 30
+              pattern: '^( |(?=.*?[A-Z])([A-Za-z-]+ )*?[A-Za-z-]+)$'
+              type: string
+            middle_name:
+              maxLength: 40
+              pattern: '^( |(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+)$'
+              type: string
+            preferred_first_name:
+              maxLength: 25
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            preferred_surname:
+              maxLength: 40
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            sex:
+              default: '?'
+              enum:
+                - '?'
+                - F
+                - M
+              type: string
+            suffix:
+              default: ' '
+              description: 'Generational suffix for name: Roman Numeral, JR, SR, Jr, or Sr'
+              maxLength: 10
+              minLength: 1
+              pattern: >-
+                ^(
+                |Sr|SR|JR|Jr|M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3}))$
+              type: string
+            surname:
+              maxLength: 40
+              pattern: '^(?=.*?[A-Z])([A-Za-z-'']+ )*?[A-Za-z-'']+$'
+              type: string
+            updated_by_byu_id:
+              pattern: '^( |[0-9A-Z]{1,9})$'
+              type: string
+            updated_datetime:
+              format: date-time
+              type: string
+          required:
+            - surname
+            - first_name
+          type: object
+
     delete: {}
 
     subresources:
@@ -447,9 +580,9 @@ resources:
                 enum: [H, M, L, N]
             api_types: [modifiable, read-only]
         create:
-          input_schema: {}
+          input: {}
         update:
-          input_schema: {}
+          input: {}
         delete: {}
 
 #    claims:

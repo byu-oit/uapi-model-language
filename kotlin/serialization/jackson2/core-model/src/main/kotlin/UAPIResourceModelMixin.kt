@@ -6,7 +6,7 @@ import edu.byu.uapi.model.UAPIListResourceModel
 import edu.byu.uapi.model.UAPISingletonResourceModel
 
 @JsonTypeInfo(
-    include = JsonTypeInfo.As.PROPERTY,
+    include = JsonTypeInfo.As.EXISTING_PROPERTY,
     property = "type",
     use = JsonTypeInfo.Id.NAME
 )
@@ -16,4 +16,4 @@ import edu.byu.uapi.model.UAPISingletonResourceModel
         JsonSubTypes.Type(UAPISingletonResourceModel::class, name = "singleton")
     ]
 )
-interface UAPIResourceModelMixin
+internal interface UAPIResourceModelMixin

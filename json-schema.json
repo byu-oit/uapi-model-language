@@ -581,11 +581,11 @@
     "uapi-create-mutation": {
       "type": "object",
       "required": [
-        "input_schema"
+        "input"
       ],
       "properties": {
-        "input_schema": {
-          "$ref": "#/definitions/uapi-input-schema"
+        "input": {
+          "$ref": "#/definitions/uapi-input"
         },
         "documentation": {
           "$ref": "#/definitions/uapi-documentation"
@@ -604,11 +604,11 @@
     "uapi-update-mutation": {
       "type": "object",
       "required": [
-        "input_schema"
+        "input"
       ],
       "properties": {
-        "input_schema": {
-          "$ref": "#/definitions/uapi-input-schema"
+        "input": {
+          "$ref": "#/definitions/uapi-input"
         },
         "creates_if_missing": {
           "type": "boolean"
@@ -644,22 +644,29 @@
       },
       "additionalProperties": false
     },
-    "uapi-input-schema": {
-      "type": "object",
+    "uapi-input": {
       "properties": {
-        "documentation": {
-          "$ref": "#/definitions/uapi-documentation"
-        },
-        "$comment": {
-          "$ref": "#/definitions/uapi-comment"
+        "application/json": {
+          "$ref": "http://json-schema.org/draft-07/schema"
         }
       },
       "patternProperties": {
-        "^x-": {
-          "$ref": "#/definitions/uapi-extension"
+        "^[*\\w]+/[-*.+\\w]+$": {
+          "$comment": "This regex is supposed to (imperfectly) represent any valid MIME type, including wildcards (like '*/*')",
+          "oneOf": [
+            {
+              "type": "object"
+            },
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "string"
+            }
+          ]
         }
       },
-      "additionalProperties": false
+      "minProperties": 1
     },
     "uapi-list-feature-model": {
       "type": "object",

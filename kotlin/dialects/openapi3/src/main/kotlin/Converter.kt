@@ -11,6 +11,7 @@ import io.swagger.v3.oas.models.parameters.PathParameter
 import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
+import toOpenAPISchema
 import java.math.BigDecimal
 import kotlin.reflect.KClass
 
@@ -175,7 +176,19 @@ internal fun UAPIListResourceModel.listPathItem(name: String): PathItem {
     return PathItem().also {
         it.description = this.documentation
         it.get = this.toListOperation(name)
-        it.post = this.create?.let { c -> Operation() }
+        it.post = this.create?.toOperation(name)
+    }
+}
+
+internal fun UAPICreateMutation.toOperation(name: String): Operation {
+    return Operation().also { op ->
+        op.operationId = "${name}__create"
+        op.requestBody = RequestBody().also { rb ->
+            rb.content = Content().also { c ->
+                input.json?.apply { c["application/json"] = MediaType().schema(toOpenAPISchema()) }
+                //TODO: Other types?
+            }
+        }
     }
 }
 

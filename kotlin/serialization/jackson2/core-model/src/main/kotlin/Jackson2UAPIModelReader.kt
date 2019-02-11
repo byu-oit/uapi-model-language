@@ -9,7 +9,6 @@ import edu.byu.uapi.model.serialization.UAPIModelWriter
 import edu.byu.uapi.model.serialization.UAPISerializationFormat
 import edu.byu.uapi.model.serialization.jackson2.common.SerializerBase
 import java.math.BigDecimal
-import java.math.BigInteger
 import java.nio.file.Paths
 
 @AutoService(value = [UAPIModelReader::class, UAPIModelWriter::class])

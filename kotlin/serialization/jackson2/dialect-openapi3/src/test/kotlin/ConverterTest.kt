@@ -1,3 +1,4 @@
+import edu.byu.uapi.model.dialect.UAPIDefaultDialect
 import edu.byu.uapi.model.dialect.UAPIDialect
 import edu.byu.uapi.model.openapi3.OpenAPI3Dialect
 import edu.byu.uapi.model.serialization.UAPIModelReader
@@ -10,6 +11,11 @@ fun main() {
     val uapiReader = UAPIModelReader.getInstance()
 
     val personsModel = uapiReader.read(persons, UAPISerializationFormat.YAML)
+
+    File("gen-persons-uapi.json")
+        .bufferedWriter().use {
+            UAPIDefaultDialect.writer.write(personsModel, it, UAPISerializationFormat.JSON, true)
+        }
 
     val f = File("gen-persons-openapi3.yml")
 
