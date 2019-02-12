@@ -349,6 +349,8 @@ resources:
       input:
         application/json:
           type: object
+          additionalProperties:
+            type: string
           properties:
             created_by_byu_id:
               pattern: '^( |[0-9A-Z]{1,9})$'

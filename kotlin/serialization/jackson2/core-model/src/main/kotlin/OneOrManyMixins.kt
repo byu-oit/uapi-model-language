@@ -32,6 +32,19 @@ internal interface OneOrManyMixin {
     }
 }
 
+internal interface ValueOrBoolMixin {
+    interface Value {
+        @get:JsonValue
+        val value: Any?
+    }
+    interface Bool {
+        val value: Boolean
+    }
+    class Deserializer {
+
+    }
+}
+
 internal interface OneOrManyUniqueMixin {
     interface One {
         @get:JsonValue

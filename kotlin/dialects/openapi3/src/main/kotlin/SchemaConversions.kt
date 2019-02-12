@@ -4,6 +4,7 @@ import edu.byu.uapi.model.jsonschema07.OneOrMany
 import edu.byu.uapi.model.jsonschema07.OneOrManyUnique
 import edu.byu.uapi.model.jsonschema07.SimpleType
 import edu.byu.uapi.model.jsonschema07.SimpleType.*
+import edu.byu.uapi.model.jsonschema07.ValueOrBool
 import io.swagger.v3.oas.models.media.*
 import edu.byu.uapi.model.jsonschema07.Schema as UAPISchema
 
@@ -28,6 +29,10 @@ internal fun UAPISchema.toOpenAPISchema(): Schema<*> {
         }
     }
     return base.applyCommonConstraints(this)
+}
+
+internal fun ValueOrBool<UAPISchema>.toOpenAPISchema(): Schema<*> {
+    return Schema<Any>()
 }
 
 fun <T : Schema<*>> T.applyCommonConstraints(from: UAPISchema): T {

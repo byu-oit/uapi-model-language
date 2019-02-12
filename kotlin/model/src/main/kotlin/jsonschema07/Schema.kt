@@ -22,35 +22,55 @@ data class Schema(
     val maxLength: BigInteger? = null,
     val minLength: BigInteger = BigInteger.ZERO,
     val pattern: String? = null,
-    val items: OneOrMany<Schema>? = null,
-    val additionalItems: Schema? = null,
+    val items: OneOrMany<ValueOrBool<Schema>> = OneOrMany(ValueOrBool.TRUE),
+    val additionalItems: ValueOrBool<Schema> = ValueOrBool.TRUE,
     val maxItems: BigInteger? = null,
     val minItems: BigInteger = BigInteger.ZERO,
     val uniqueItems: Boolean = false,
-    val contains: Schema? = null,
+    val contains: ValueOrBool<Schema> = ValueOrBool.TRUE,
     val maxProperties: BigInteger? = null,
     val minProperties: BigInteger = BigInteger.ZERO,
     val required: List<String> = emptyList(),
-    val additionalProperties: Schema? = null,
+    val additionalProperties: ValueOrBool<Schema> = ValueOrBool.TRUE,
     // val definitions: Map<String, Schema> = emptyMap(), TODO: Refs?
-    val properties: Map<String, Schema> = emptyMap(),
-    val patternProperties: Map<String, Schema> = emptyMap(),
+    val properties: Map<String, ValueOrBool<Schema>> = emptyMap(),
+    val patternProperties: Map<String, ValueOrBool<Schema>> = emptyMap(),
     val dependencies: Map<String, Dependency> = emptyMap(),
-    val propertyNames: Schema? = null,
+    val propertyNames: ValueOrBool<Schema> = ValueOrBool.TRUE,
     val const: Any? = null,
     val enum: Set<Any> = emptySet(),
     val type: OneOrManyUnique<SimpleType>? = null,
     val format: Format? = null,
     val contentMediaType: String? = null,
     val contentEncoding: String? = null,
-    val `if`: Schema? = null,
-    val then: Schema? = null,
-    val `else`: Schema? = null,
-    val allOf: List<Schema> = emptyList(),
-    val anyOf: List<Schema> = emptyList(),
-    val oneOf: List<Schema> = emptyList(),
+    val `if`: ValueOrBool<Schema> = ValueOrBool.TRUE,
+    val then: ValueOrBool<Schema> = ValueOrBool.TRUE,
+    val `else`: ValueOrBool<Schema> = ValueOrBool.TRUE,
+    val allOf: List<ValueOrBool<Schema>> = emptyList(),
+    val anyOf: List<ValueOrBool<Schema>> = emptyList(),
+    val oneOf: List<ValueOrBool<Schema>> = emptyList(),
     val not: Schema? = null
 )
+
+sealed class ValueOrBool<out T> {
+    data class Value<out T>(val value: T) : ValueOrBool<T>()
+    data class Bool(val value: Boolean) : ValueOrBool<Nothing>()
+    companion object {
+        val TRUE = ValueOrBool.Bool(true)
+        val FALSE = ValueOrBool.Bool(false)
+
+        operator fun invoke(boolean: Boolean): ValueOrBool.Bool {
+            return when (boolean) {
+                true -> TRUE
+                false -> FALSE
+            }
+        }
+
+        operator fun <T> invoke(value: T): ValueOrBool<T> {
+            return ValueOrBool.Value(value)
+        }
+    }
+}
 
 enum class SimpleType(override val apiValue: String) : UAPIEnum {
     ARRAY("array"),
@@ -70,39 +90,31 @@ sealed class Dependency {
 sealed class OneOrMany<T> {
     data class One<T>(val value: T) : OneOrMany<T>()
     data class Many<T>(val values: List<T>) : OneOrMany<T>()
+
+    companion object {
+        operator fun <T> invoke(value: T): OneOrMany<T> {
+            return OneOrMany.One(value)
+        }
+
+        operator fun <T> invoke(values: List<T>): OneOrMany<T> {
+            return OneOrMany.Many(values)
+        }
+    }
 }
+
 
 sealed class OneOrManyUnique<T> {
     data class One<T>(val value: T) : OneOrManyUnique<T>()
     data class Many<T>(val values: Set<T>) : OneOrManyUnique<T>()
-}
 
-sealed class Format(open val value: String) {
-    object DateTime : Format("date-time")
-    object Date : Format("date")
-    object Time : Format("time")
-    object Email : Format("email")
-    object IdnEmail : Format("idn-email")
-    object Hostname : Format("hostname")
-    object IdnHostname : Format("idn-hostname")
-    object IpV4 : Format("ipv4")
-    object IpV6 : Format("ipv6")
-    object Uri : Format("uri")
-    object UriReference : Format("uri-reference")
-    object Iri : Format("iri")
-    object IriReference : Format("iri-reference")
-    object UriTemplate : Format("uri-template")
-    object JsonPointer : Format("json-pointer")
-    object RelativeJsonPointer : Format("relative-json-pointer")
-    object Regex : Format("regex")
+    companion object {
+        operator fun <T> invoke(value: T): OneOrManyUnique<T> {
+            return OneOrManyUnique.One(value)
+        }
 
-    data class Other(override val value: String) : Format(value) {
-        override fun toString(): String {
-            return super.toString()
+        operator fun <T> invoke(values: Set<T>): OneOrManyUnique<T> {
+            return OneOrManyUnique.Many(values)
         }
     }
-
-    override fun toString(): String {
-        return "Format($value)"
-    }
 }
+
