@@ -249,7 +249,7 @@ internal fun UAPISingletonSubresourceModel.toPathItem(
         description = sr.documentation
         parameters = parent.params
         get = sr.toGetOperation(parent, name)
-        put = sr.update?.let { c -> Operation() }
+        put = sr.update?.toOperation(name)
         delete = sr.delete?.run { toDeleteOperation(name) }
     }
 }
