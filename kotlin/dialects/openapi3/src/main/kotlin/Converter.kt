@@ -188,6 +188,20 @@ internal fun UAPICreateMutation.toOperation(name: String): Operation {
                 //TODO: Other types?
             }
         }
+        //TODO: Add responses
+    }
+}
+
+internal fun UAPIUpdateMutation.toOperation(name: String): Operation {
+    return Operation().also { op ->
+        op.operationId = "${name}__update"
+        op.requestBody = RequestBody().also { rb ->
+            rb.content = Content().also { c ->
+                input.json?.apply { c["application/json"] = MediaType().schema(toOpenAPISchema()) }
+                //TODO: Other types?
+            }
+        }
+        //TODO: Add responses
     }
 }
 
@@ -205,7 +219,7 @@ internal fun UAPIListSubresourceModel.getListPathItem(parent: SubresourceParent,
         summary = "Operations on $name subresource collection"
         parameters = parent.params
         get = sr.toListOperation(parent, name)
-        post = sr.create?.let { c -> Operation() }
+        post = sr.create?.toOperation(name)
     }
 }
 
@@ -220,7 +234,7 @@ internal fun UAPIListSubresourceModel.getSinglePathItem(
         summary = "Operations on $name subresource"
         parameters = parent.params + idParams
         get = sr.toSingleGetOperation(parent, name)
-        put = sr.update?.let { c -> Operation() }
+        put = sr.update?.toOperation(name)
         delete = sr.delete?.run { toDeleteOperation(name) }
     }
 }
@@ -292,7 +306,6 @@ internal fun UAPIDeleteMutation.toDeleteOperation(name: String): Operation {
         o.summary = "Delete $name"
         o.description = this.documentation
         o.responses = deleteResponses()
-
     }
 }
 

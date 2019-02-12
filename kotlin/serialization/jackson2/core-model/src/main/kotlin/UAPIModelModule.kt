@@ -26,11 +26,6 @@ class UAPIModelModule : SimpleModule(
 
         context.mixin(UAPIInput::class, UAPIInputMixin::class)
 
-        context.mixin(OneOrMany.One::class, OneOrManyMixin.One::class)
-        context.mixin(OneOrMany.Many::class, OneOrManyMixin.Many::class)
-        context.mixin(OneOrManyUnique.One::class, OneOrManyUniqueMixin.One::class)
-        context.mixin(OneOrManyUnique.Many::class, OneOrManyUniqueMixin.Many::class)
-
         context.mixin(Dependency::class, DependencyMixin::class)
         context.mixin(Dependency.SchemaDependency::class, DependencyMixin.SchemaDependency::class)
         context.mixin(Dependency.PropertyListDependency::class, DependencyMixin.PropertyListDependency::class)
@@ -38,8 +33,8 @@ class UAPIModelModule : SimpleModule(
         context.mixin(Schema::class, SchemaMixin::class)
         context.mixin(Format::class, FormatMixin::class)
 
-        context.addDeserializers(ValueOrBoolDeserializers)
-        context.addSerializers(ValueOrBooleanSerializers)
+        context.addDeserializers(UAPIDeserializers)
+        context.addSerializers(UAPISerializers)
     }
 
     private fun SetupContext.mixin(
@@ -50,22 +45,32 @@ class UAPIModelModule : SimpleModule(
     }
 }
 
-object ValueOrBoolDeserializers : Deserializers.Base() {
+object UAPIDeserializers : Deserializers.Base() {
     override fun findBeanDeserializer(
         type: JavaType,
         config: DeserializationConfig,
         beanDesc: BeanDescription
     ): JsonDeserializer<*>? {
-        return if (type.isTypeOrSubTypeOf(ValueOrBool::class.java)) {
-            val contents = type.containedTypeOrUnknown(0)
-            ValueOrBoolDeser<Any>(contents)
-        } else {
-            super.findBeanDeserializer(type, config, beanDesc)
+        return when {
+            type.isTypeOrSubTypeOf(ValueOrBool::class.java) -> {
+                val contents = type.containedTypeOrUnknown(0)
+                ValueOrBoolDeser<Any>(contents)
+            }
+            type.isTypeOrSubTypeOf(OneOrManyIsh::class.java) -> {
+                val contents = type.containedTypeOrUnknown(0)
+                val array = config.typeFactory.constructArrayType(contents)
+                if (type.isTypeOrSubTypeOf(OneOrMany::class.java)) {
+                    OneOrManyDeser<Any>(contents, array)
+                } else {
+                    OneOrManyUniqueDeser<Any>(contents, array)
+                }
+            }
+            else -> super.findBeanDeserializer(type, config, beanDesc)
         }
     }
 }
 
-object ValueOrBooleanSerializers : Serializers.Base() {
+object UAPISerializers : Serializers.Base() {
     override fun findSerializer(
         config: SerializationConfig,
         type: JavaType,
@@ -73,6 +78,8 @@ object ValueOrBooleanSerializers : Serializers.Base() {
     ): JsonSerializer<*>? {
         if (type.isTypeOrSubTypeOf(ValueOrBool::class.java)) {
             return ValueOrBoolSer()
+        } else if (type.isTypeOrSubTypeOf(OneOrManyIsh::class.java)) {
+            return OneOrManyIshSer()
         }
         return super.findSerializer(config, type, beanDesc)
     }
@@ -96,6 +103,50 @@ internal class ValueOrBoolSer: StdSerializer<ValueOrBool<*>>(ValueOrBool::class.
             is ValueOrBool.Value -> gen.writeObject(value.value)
             is ValueOrBool.Bool -> gen.writeBoolean(value.value)
         }.exhaustive
+    }
+}
+
+internal abstract class OneOrManyBaseDeser<T, Impl: OneOrManyIsh<*, *>>(
+    type: KClass<*>,
+    private val contentType: JavaType,
+    private val arrayType: JavaType
+): StdDeserializer<Impl>(type.java) {
+    override fun deserialize(p: JsonParser, ctxt: DeserializationContext): Impl {
+        return when (p.currentToken) {
+            JsonToken.START_ARRAY -> createMany(ctxt.readValue(p, arrayType))
+            else -> createOne(ctxt.readValue(p, contentType))
+        }
+    }
+
+    abstract fun createOne(value: T): Impl
+    abstract fun createMany(values: Collection<T>): Impl
+}
+
+internal class OneOrManyDeser<T>(
+    contentType: JavaType,
+    arrayType: JavaType
+): OneOrManyBaseDeser<T, OneOrMany<T>>(OneOrMany::class, contentType, arrayType) {
+    override fun createOne(value: T): OneOrMany<T> = OneOrMany(value)
+    override fun createMany(values: Collection<T>): OneOrMany<T> = OneOrMany(values.toList())
+}
+
+internal class OneOrManyUniqueDeser<T>(
+    contentType: JavaType,
+    arrayType: JavaType
+): OneOrManyBaseDeser<T, OneOrManyUnique<T>>(OneOrManyUnique::class, contentType, arrayType) {
+    override fun createOne(value: T): OneOrManyUnique<T> = OneOrManyUnique(value)
+    override fun createMany(values: Collection<T>): OneOrManyUnique<T> = OneOrManyUnique(values.toSet())
+}
+
+internal class OneOrManyIshSer: StdSerializer<OneOrManyIsh<*, *>>(OneOrManyIsh::class.java, true) {
+    override fun serialize(value: OneOrManyIsh<*, *>, gen: JsonGenerator, provider: SerializerProvider) {
+        value.map({
+            gen.writeObject(it)
+        }, {
+            gen.writeStartArray()
+            it.forEach(gen::writeObject)
+            gen.writeEndArray()
+        })
     }
 }
 

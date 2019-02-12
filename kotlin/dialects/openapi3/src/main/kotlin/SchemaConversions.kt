@@ -32,7 +32,21 @@ internal fun UAPISchema.toOpenAPISchema(): Schema<*> {
 }
 
 internal fun ValueOrBool<UAPISchema>.toOpenAPISchema(): Schema<*> {
-    return Schema<Any>()
+    return when(this) {
+        is ValueOrBool.Value -> this.value.toOpenAPISchema()
+        is ValueOrBool.Bool -> if (this.value) {
+            Schema<Any>()
+        } else {
+            Schema<Any>().not(Schema<Any>())
+        }
+    }
+}
+
+internal fun ValueOrBool<UAPISchema>.toSchemaOrBoolean(): Any {
+    return when(this) {
+        is ValueOrBool.Value -> this.value.toOpenAPISchema()
+        is ValueOrBool.Bool -> this.value
+    }
 }
 
 fun <T : Schema<*>> T.applyCommonConstraints(from: UAPISchema): T {
@@ -56,7 +70,7 @@ fun <T : Schema<*>> T.applyCommonConstraints(from: UAPISchema): T {
     maxProperties = from.maxProperties?.toInt()
     minProperties = from.minProperties.toInt()
     required = from.required
-    additionalProperties = from.additionalProperties?.toOpenAPISchema()
+    additionalProperties = from.additionalProperties?.toSchemaOrBoolean()
     properties = from.properties.mapValues { it.value.toOpenAPISchema() }
     //TODO: patternProperties?
     //TODO: Dependencies?
@@ -72,7 +86,7 @@ fun <T : Schema<*>> T.applyCommonConstraints(from: UAPISchema): T {
     from.contentMediaType.ifNotNull { addExtension("x-draft07-contentMediaType", from.contentMediaType) }
     from.contentEncoding.ifNotNull { addExtension("x-draft07-contentEncoding", from.contentEncoding) }
     //TODO: if, then, else
-    //TODO: not
+    not = from.not?.toOpenAPISchema()
     return this
 }
 
@@ -91,9 +105,6 @@ private fun UAPISchema.baseSchemaFor(type: SimpleType): Schema<*> {
 fun UAPISchema.buildArrayItemsSchema(): Schema<*> {
     val items = this.items
     val additional = this.additionalItems?.toOpenAPISchema()
-    if (items == null) {
-        return additional ?: Schema<Any>()
-    }
     return when (items) {
         is OneOrMany.One -> {
             val s = items.value.toOpenAPISchema()

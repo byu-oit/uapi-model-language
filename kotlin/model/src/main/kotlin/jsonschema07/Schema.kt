@@ -23,7 +23,7 @@ data class Schema(
     val minLength: BigInteger = BigInteger.ZERO,
     val pattern: String? = null,
     val items: OneOrMany<ValueOrBool<Schema>> = OneOrMany(ValueOrBool.TRUE),
-    val additionalItems: ValueOrBool<Schema> = ValueOrBool.TRUE,
+    val additionalItems: ValueOrBool<Schema>? = null,
     val maxItems: BigInteger? = null,
     val minItems: BigInteger = BigInteger.ZERO,
     val uniqueItems: Boolean = false,
@@ -31,7 +31,7 @@ data class Schema(
     val maxProperties: BigInteger? = null,
     val minProperties: BigInteger = BigInteger.ZERO,
     val required: List<String> = emptyList(),
-    val additionalProperties: ValueOrBool<Schema> = ValueOrBool.TRUE,
+    val additionalProperties: ValueOrBool<Schema>? = null,
     // val definitions: Map<String, Schema> = emptyMap(), TODO: Refs?
     val properties: Map<String, ValueOrBool<Schema>> = emptyMap(),
     val patternProperties: Map<String, ValueOrBool<Schema>> = emptyMap(),
@@ -87,9 +87,25 @@ sealed class Dependency {
     data class PropertyListDependency(val properties: List<String>) : Dependency()
 }
 
-sealed class OneOrMany<T> {
-    data class One<T>(val value: T) : OneOrMany<T>()
-    data class Many<T>(val values: List<T>) : OneOrMany<T>()
+interface OneOrManyIsh<out T, out L : Collection<T>> {
+    val value: T?
+        get() = null
+    val values: L?
+        get() = null
+}
+
+inline fun <T, L : Collection<T>, R> OneOrManyIsh<T, L>.map(one: (T) -> R, many: (L) -> R): R {
+    val v = value
+    return if (v != null) {
+        one(v)
+    } else {
+        many(values!!)
+    }
+}
+
+sealed class OneOrMany<T> : OneOrManyIsh<T, List<T>> {
+    data class One<T>(override val value: T) : OneOrMany<T>()
+    data class Many<T>(override val values: List<T>) : OneOrMany<T>()
 
     companion object {
         operator fun <T> invoke(value: T): OneOrMany<T> {
@@ -102,10 +118,9 @@ sealed class OneOrMany<T> {
     }
 }
 
-
-sealed class OneOrManyUnique<T> {
-    data class One<T>(val value: T) : OneOrManyUnique<T>()
-    data class Many<T>(val values: Set<T>) : OneOrManyUnique<T>()
+sealed class OneOrManyUnique<T> : OneOrManyIsh<T, Set<T>> {
+    data class One<T>(override val value: T) : OneOrManyUnique<T>()
+    data class Many<T>(override val values: Set<T>) : OneOrManyUnique<T>()
 
     companion object {
         operator fun <T> invoke(value: T): OneOrManyUnique<T> {

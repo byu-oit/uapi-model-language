@@ -14,19 +14,4 @@ import edu.byu.uapi.model.jsonschema07.SimpleType
 @JsonIgnoreProperties(ignoreUnknown = false)
 @JsonInclude(JsonInclude.Include.NON_DEFAULT)
 @JsonNaming(value = PropertyNamingStrategy::class /* Lower camel case */)
-internal interface SchemaMixin {
-    @get:JsonDeserialize(using = OneOrManyUniqueSimpleTypeDeser::class)
-    val type: OneOrManyUnique<SimpleType>
-    @get:JsonDeserialize(using = OneOrManySchemaDeser::class)
-    val items: OneOrMany<Schema>
-
-    class OneOrManyUniqueSimpleTypeDeser : OneOrManyUniqueMixin.OneOrManyUniqueDeserializer<SimpleType>(
-        object : TypeReference<SimpleType>() {},
-        object : TypeReference<List<SimpleType>>() {}
-    )
-
-    class OneOrManySchemaDeser : OneOrManyMixin.OneOrManyDeserializer<Schema>(
-        object : TypeReference<Schema>() {},
-        object : TypeReference<List<Schema>>() {}
-    )
-}
+internal interface SchemaMixin
