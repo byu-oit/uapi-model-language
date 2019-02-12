@@ -11,7 +11,6 @@ import io.swagger.v3.oas.models.parameters.PathParameter
 import io.swagger.v3.oas.models.parameters.RequestBody
 import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
-import toOpenAPISchema
 import java.math.BigDecimal
 import kotlin.reflect.KClass
 
