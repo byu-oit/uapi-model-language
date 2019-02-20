@@ -15,6 +15,9 @@
     "$schema": {
       "type": "string"
     },
+    "environments": {
+      "$ref": "#/definitions/uapi-environments"
+    },
     "info": {
       "$ref": "#/definitions/uapi-info"
     },
@@ -1061,6 +1064,9 @@
     "uapi-documentation": {
       "description": "Describes an element. Can contain valid CommonMark-flavored Markdown.",
       "type": "string"
+    },
+    "uapi-environments": {
+      "type": "object"
     }
   }
 }

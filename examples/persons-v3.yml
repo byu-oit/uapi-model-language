@@ -4,6 +4,9 @@
 info:
   name: "Persons"
   version: "3.0"
+#environments:
+#  prod:
+
 resources:
   persons:
     type: list

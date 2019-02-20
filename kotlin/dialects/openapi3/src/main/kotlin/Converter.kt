@@ -295,7 +295,7 @@ internal fun UAPIListResourceModel.singlePathItem(resourceName: String, idParams
         it.parameters = idParams
         it.description = this.documentation
         it.get = this.toSingleGetOperation(resourceName)
-        it.put = this.update?.let { u -> Operation() }
+        it.put = this.update?.toOperation(resourceName)
         it.delete = this.delete?.run { toDeleteOperation(resourceName) }
     }
 }
