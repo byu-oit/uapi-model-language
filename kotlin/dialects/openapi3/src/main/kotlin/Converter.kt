@@ -4,6 +4,7 @@ import edu.byu.uapi.model.*
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
+import io.swagger.v3.oas.models.headers.Header
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.parameters.Parameter
@@ -172,14 +173,15 @@ internal fun UAPISingletonSubresourceModel.toOpenAPI3Paths(
 
 
 internal fun UAPIListResourceModel.listPathItem(name: String): PathItem {
+    val responseItemSchema = this.toResponseItemSchema()
     return PathItem().also {
         it.description = this.documentation
         it.get = this.toListOperation(name)
-        it.post = this.create?.toOperation(name)
+        it.post = this.create?.toOperation(name, responseItemSchema)
     }
 }
 
-internal fun UAPICreateMutation.toOperation(name: String): Operation {
+internal fun UAPICreateMutation.toOperation(name: String, itemSchema: Schema<*>): Operation {
     return Operation().also { op ->
         op.operationId = "${name}__create"
         op.requestBody = RequestBody().also { rb ->
@@ -188,11 +190,28 @@ internal fun UAPICreateMutation.toOperation(name: String): Operation {
                 //TODO: Other types?
             }
         }
-        //TODO: Add responses
+        op.responses = ApiResponses().also { ar ->
+            ar.putAll(
+                mapOf(
+                    "201" to ApiResponse()
+                        .description("Create Successful")
+                        .content(
+                            Content().addMediaType(
+                                "application/json", MediaType().schema(itemSchema)
+                            )
+                        )
+                        .addHeaderObject("Location", Header().schema(StringSchema().format("uri")))
+                    ,
+                    "400" to errorResponse("Invalid Request Body", 400),
+                    "403" to errorResponse("Unauthorized", 403)
+                )
+            )
+            ar.default = errorResponse("Unexpected Error")
+        }
     }
 }
 
-internal fun UAPIUpdateMutation.toOperation(name: String): Operation {
+internal fun UAPIUpdateMutation.toOperation(name: String, itemSchema: Schema<*>): Operation {
     return Operation().also { op ->
         op.operationId = "${name}__update"
         op.requestBody = RequestBody().also { rb ->
@@ -200,6 +219,29 @@ internal fun UAPIUpdateMutation.toOperation(name: String): Operation {
                 input.json?.apply { c["application/json"] = MediaType().schema(toOpenAPISchema()) }
                 //TODO: Other types?
             }
+        }
+
+        op.responses = ApiResponses().also { ar ->
+            ar.putAll(
+                mapOf(
+                    "201" to ApiResponse()
+                        .description("Create Successful")
+                        .content(
+                            Content().addMediaType(
+                                "application/json", MediaType().schema(itemSchema)
+                            )
+                        )
+                        .addHeaderObject("Location", Header().schema(StringSchema().format("uri")))
+                    ,
+                    "400" to errorResponse("Invalid Request Body", 400),
+                    "403" to errorResponse("Unauthorized", 403),
+                    "409" to errorResponse(
+                        "Unable To Update\n\nBusiness rules prevent this record from being updated in its current state.",
+                        409
+                    )
+                )
+            )
+            ar.default = errorResponse("Unexpected Error")
         }
         //TODO: Add responses
     }
@@ -219,7 +261,7 @@ internal fun UAPIListSubresourceModel.getListPathItem(parent: SubresourceParent,
         summary = "Operations on $name subresource collection"
         parameters = parent.params
         get = sr.toListOperation(parent, name)
-        post = sr.create?.toOperation(name)
+        post = sr.create?.toOperation(name, sr.toResponseItemSchema(parent))
     }
 }
 
@@ -234,7 +276,7 @@ internal fun UAPIListSubresourceModel.getSinglePathItem(
         summary = "Operations on $name subresource"
         parameters = parent.params + idParams
         get = sr.toSingleGetOperation(parent, name)
-        put = sr.update?.toOperation(name)
+        put = sr.update?.toOperation(name, sr.toResponseItemSchema(parent))
         delete = sr.delete?.run { toDeleteOperation(name) }
     }
 }
@@ -249,7 +291,7 @@ internal fun UAPISingletonSubresourceModel.toPathItem(
         description = sr.documentation
         parameters = parent.params
         get = sr.toGetOperation(parent, name)
-        put = sr.update?.toOperation(name)
+        put = sr.update?.toOperation(name, sr.toResponseItemSchema(parent))
         delete = sr.delete?.run { toDeleteOperation(name) }
     }
 }
@@ -295,7 +337,7 @@ internal fun UAPIListResourceModel.singlePathItem(resourceName: String, idParams
         it.parameters = idParams
         it.description = this.documentation
         it.get = this.toSingleGetOperation(resourceName)
-        it.put = this.update?.toOperation(resourceName)
+        it.put = this.update?.toOperation(resourceName, toResponseItemSchema())
         it.delete = this.delete?.run { toDeleteOperation(resourceName) }
     }
 }
