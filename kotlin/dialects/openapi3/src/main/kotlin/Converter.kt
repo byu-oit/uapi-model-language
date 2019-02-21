@@ -4,7 +4,6 @@ import edu.byu.uapi.model.*
 import io.swagger.v3.oas.models.OpenAPI
 import io.swagger.v3.oas.models.Operation
 import io.swagger.v3.oas.models.PathItem
-import io.swagger.v3.oas.models.headers.Header
 import io.swagger.v3.oas.models.info.Info
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.parameters.Parameter
@@ -184,36 +183,28 @@ internal fun UAPIListResourceModel.listPathItem(name: String): PathItem {
 internal fun UAPICreateMutation.toOperation(name: String, itemSchema: Schema<*>): Operation {
     return Operation().also { op ->
         op.operationId = "${name}__create"
+        op.summary = "Create $name"
         op.requestBody = RequestBody().also { rb ->
             rb.content = Content().also { c ->
                 input.json?.apply { c["application/json"] = MediaType().schema(toOpenAPISchema()) }
                 //TODO: Other types?
             }
         }
-        op.responses = ApiResponses().also { ar ->
-            ar.putAll(
-                mapOf(
-                    "201" to ApiResponse()
-                        .description("Create Successful")
-                        .content(
-                            Content().addMediaType(
-                                "application/json", MediaType().schema(itemSchema)
-                            )
-                        )
-                        .addHeaderObject("Location", Header().schema(StringSchema().format("uri")))
-                    ,
-                    "400" to errorResponse("Invalid Request Body", 400),
-                    "403" to errorResponse("Unauthorized", 403)
-                )
-            )
-            ar.default = errorResponse("Unexpected Error")
-        }
+        op.responses = buildApiResponses(
+            createSuccessResponse(itemSchema),
+            invalidRequestResponse("Request Body")
+        )
     }
 }
 
 internal fun UAPIUpdateMutation.toOperation(name: String, itemSchema: Schema<*>): Operation {
     return Operation().also { op ->
         op.operationId = "${name}__update"
+        if (this.createsIfMissing) {
+            op.summary = "Create or Update $name"
+        } else {
+            op.summary = "Update $name"
+        }
         op.requestBody = RequestBody().also { rb ->
             rb.content = Content().also { c ->
                 input.json?.apply { c["application/json"] = MediaType().schema(toOpenAPISchema()) }
@@ -221,29 +212,15 @@ internal fun UAPIUpdateMutation.toOperation(name: String, itemSchema: Schema<*>)
             }
         }
 
-        op.responses = ApiResponses().also { ar ->
-            ar.putAll(
-                mapOf(
-                    "201" to ApiResponse()
-                        .description("Create Successful")
-                        .content(
-                            Content().addMediaType(
-                                "application/json", MediaType().schema(itemSchema)
-                            )
-                        )
-                        .addHeaderObject("Location", Header().schema(StringSchema().format("uri")))
-                    ,
-                    "400" to errorResponse("Invalid Request Body", 400),
-                    "403" to errorResponse("Unauthorized", 403),
-                    "409" to errorResponse(
-                        "Unable To Update\n\nBusiness rules prevent this record from being updated in its current state.",
-                        409
-                    )
-                )
-            )
-            ar.default = errorResponse("Unexpected Error")
+        op.responses = buildApiResponses(
+            createSuccessResponse(itemSchema),
+            invalidRequestResponse("Request Body"),
+            businessRulesPreventMutation("Update", "updated")
+        )
+
+        if (!createsIfMissing) {
+            op.responses.putAll(listOf(notFoundResponse(name)))
         }
-        //TODO: Add responses
     }
 }
 
@@ -352,15 +329,10 @@ internal fun UAPIDeleteMutation.toDeleteOperation(name: String): Operation {
 }
 
 internal fun deleteResponses(): ApiResponses {
-    return ApiResponses().also { r ->
-        r["204"] = ApiResponse().description("Success")
-        r["403"] = errorResponse("Caller is not allowed to delete this record.", 403)
-        r["409"] = errorResponse(
-            "Unable To Delete\n\nBusiness rules prevent this record from being deleted in its current state.",
-            409
-        )
-        r.default = errorResponse("Generic Error")
-    }
+    return buildApiResponses(
+        noContentResponse(),
+        businessRulesPreventMutation("Delete", "deleted")
+    )
 }
 
 internal fun UAPIListResourceModel.toListOperation(name: String): Operation {
@@ -370,21 +342,13 @@ internal fun UAPIListResourceModel.toListOperation(name: String): Operation {
         op.operationId = "${name}__list"
         op.parameters = this.getListParameters(name)
         op.extensions = this.extensions.ifEmpty { null }
-        op.responses = ApiResponses().also { r ->
-            r["200"] = ApiResponse()
-                .content(
-                    Content().addMediaType(
-                        "application/json",
-                        MediaType().schema(
-                            listSchemaFor(
-                                this.listItemModel(this.asSubresourceParent(name)),
-                                subresources.keys + "basic"
-                            )
-                        )
-                    )
+        op.responses = buildApiResponses(
+            normalResponse(
+                listSchemaFor(
+                    listItemModel(asSubresourceParent(name)), subresources.keys + "basic"
                 )
-            r.default = uapiErrorResponse
-        }
+            )
+        )
     }
 }
 
@@ -398,18 +362,9 @@ internal fun UAPIListSubresourceModel.toListOperation(parent: SubresourceParent,
         description = sr.list?.documentation
         parameters = sr.getListParameters(name)
         extensions = sr.extensions.ifEmpty { null }
-        responses = ApiResponses().apply {
-            this["200"] = ApiResponse()
-                .content(
-                    Content().addMediaType(
-                        "application/json",
-                        MediaType().schema(
-                            sr.listSchemaFor(sr.toResponseItemSchema(parent))
-                        )
-                    )
-                )
-            default = uapiErrorResponse
-        }
+        responses = buildApiResponses(
+            normalResponse(sr.listSchemaFor(sr.toResponseItemSchema(parent)))
+        )
     }
 }
 
@@ -426,18 +381,9 @@ internal fun UAPIListResourceModel.toSingleGetOperation(name: String): Operation
         operationId = "${singleName}__info"
         parameters = res.getFieldsetParameters()
         extensions = res.extensions.ifEmpty { null }
-        responses = ApiResponses().apply {
-            this["200"] = ApiResponse()
-                .content(
-                    Content().addMediaType(
-                        "application/json",
-                        MediaType().schema(
-                            res.listItemModel(res.asSubresourceParent(name))
-                        )
-                    )
-                )
-            default = uapiErrorResponse
-        }
+        responses = buildApiResponses(
+            normalResponse(res.listItemModel(res.asSubresourceParent(name)))
+        )
     }
 }
 
@@ -452,18 +398,10 @@ internal fun UAPIListSubresourceModel.toSingleGetOperation(parent: SubresourcePa
         summary = "Get single $singleName"
         operationId = "${parent.name}__${singleName}__info"
         extensions = sr.extensions.ifEmpty { null }
-        responses = ApiResponses().apply {
-            this["200"] = ApiResponse()
-                .content(
-                    Content().addMediaType(
-                        "application/json",
-                        MediaType().schema(
-                            sr.toResponseItemSchema(parent)
-                        )
-                    )
-                )
-            default = uapiErrorResponse
-        }
+        responses = buildApiResponses(
+            normalResponse(sr.toResponseItemSchema(parent)),
+            notFoundResponse(name)
+        )
     }
 }
 
@@ -476,17 +414,10 @@ internal fun UAPISingletonSubresourceModel.toGetOperation(
         summary = "Get $name"
         operationId = "${parent.name}__${name}__info"
         extensions = sr.extensions.ifEmpty { null }
-        responses = ApiResponses().apply {
-            this["200"] = ApiResponse()
-                .content(
-                    Content().addMediaType(
-                        "application/json",
-                        MediaType().schema(
-                            sr.toResponseItemSchema(parent)
-                        )
-                    )
-                )
-        }
+        responses = buildApiResponses(
+            normalResponse(sr.toResponseItemSchema(parent)),
+            notFoundResponse(name)
+        )
     }
 }
 

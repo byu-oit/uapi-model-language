@@ -3,8 +3,10 @@ package edu.byu.uapi.model.openapi3
 import edu.byu.uapi.model.*
 import edu.byu.uapi.model.UAPIListFilterOperator.*
 import edu.byu.uapi.model.UAPIValueType.*
+import io.swagger.v3.oas.models.headers.Header
 import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.responses.ApiResponse
+import io.swagger.v3.oas.models.responses.ApiResponses
 
 val apiTypeSchema = UAPIApiType.values().asList().toOpenAPI3Schema()
 
@@ -170,4 +172,62 @@ val uapiErrorResponse: ApiResponse = ApiResponse().apply {
 
                 )
         )
+}
+
+val basicApiResponses: Map<String, ApiResponse> = mapOf(
+    "403" to errorResponse("Not Authorized", 403),
+    "5XX" to errorResponse("Unexpected Error")
+)
+
+fun buildApiResponses(vararg customResponses: Pair<String, ApiResponse>) = buildApiResponses(customResponses.toList())
+
+fun buildApiResponses(customResponses: Iterable<Pair<String, ApiResponse>>): ApiResponses {
+    val r = ApiResponses()
+    r.putAll(basicApiResponses)
+    r.putAll(customResponses)
+    return r
+}
+
+fun normalResponse(schema: Schema<*>): Pair<String, ApiResponse> {
+    return "200" to ApiResponse()
+        .content(
+            Content().addMediaType(
+                "application/json",
+                MediaType().schema(schema)
+            )
+        )
+}
+
+fun createSuccessResponse(itemSchema: Schema<*>): Pair<String, ApiResponse> {
+    return "201" to ApiResponse()
+        .description("Create Successful")
+        .content(
+            Content().addMediaType(
+                "application/json", MediaType().schema(itemSchema)
+            )
+        )
+        .addHeaderObject("Location", Header().schema(StringSchema().format("uri")))
+}
+
+fun noContentResponse(): Pair<String, ApiResponse> {
+    return "204" to ApiResponse().description("Success")
+}
+
+fun invalidRequestResponse(thingThatsInvalid: String = "Request"): Pair<String, ApiResponse> {
+    return "400" to errorResponse("Invalid $thingThatsInvalid", 400)
+}
+
+fun notFoundResponse(thingThatsNotFound: String): Pair<String, ApiResponse> {
+    return "404" to errorResponse("$thingThatsNotFound Does Not Exist")
+}
+
+fun businessRulesPreventMutation(actionVerb: String, actionPastTense: String): Pair<String, ApiResponse> {
+    return "409" to errorResponse(
+        """
+            Unable To ${actionVerb.capitalize()}
+
+            Business rules prevent this record from being $actionPastTense in its current state.
+        """.trimIndent(),
+        409
+    )
 }
