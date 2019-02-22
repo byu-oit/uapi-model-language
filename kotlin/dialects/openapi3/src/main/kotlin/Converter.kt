@@ -78,7 +78,7 @@ internal fun Map<String, UAPIClaimModel>.toClaimRequestSchema(): Schema<*> {
                 .properties(
                     mapOf(
                         "subject" to StringSchema(),
-                        "mode" to StringSchema()._enum(listOf("ALL", "ANY", "ONE")),
+                        "mode" to StringSchema()._enum(listOf("ALL", "ANY")),
                         "claims" to this.toClaimsSchema()
                     )
                 )
