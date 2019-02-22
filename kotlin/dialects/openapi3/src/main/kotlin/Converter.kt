@@ -9,7 +9,6 @@ import io.swagger.v3.oas.models.media.*
 import io.swagger.v3.oas.models.parameters.Parameter
 import io.swagger.v3.oas.models.parameters.PathParameter
 import io.swagger.v3.oas.models.parameters.RequestBody
-import io.swagger.v3.oas.models.responses.ApiResponse
 import io.swagger.v3.oas.models.responses.ApiResponses
 import java.math.BigDecimal
 import kotlin.reflect.KClass
@@ -43,8 +42,7 @@ internal fun UAPIResourceModel.toOpenAPI3Paths(name: String): List<Pair<String, 
 internal fun UAPIResourceModel.getClaimPaths(name: String): List<Pair<String, PathItem>> {
     val claims = this.claims.ifEmpty { return emptyList() }
     return listOf(
-        "/claims/$name" to claims.toClaimPathItem(name),
-        "/claims/$name/batch" to claims.toBatchClaimPathItem(name)
+        "/claims/$name" to claims.toClaimPathItem(name)
     )
 }
 
@@ -63,20 +61,27 @@ internal fun Map<String, UAPIClaimModel>.toClaimPutOperation(name: String): Oper
                     Content()
                         .addMediaType(
                             "application/json", MediaType()
-                                .schema(this.toSingleClaimRequestSchema())
+                                .schema(this.toClaimRequestSchema())
                         )
                 )
         )
+        .responses(buildApiResponses(
+            successfulClaimResponse()
+        ))
 }
 
-internal fun Map<String, UAPIClaimModel>.toSingleClaimRequestSchema(): Schema<*> {
+internal fun Map<String, UAPIClaimModel>.toClaimRequestSchema(): Schema<*> {
     return ObjectSchema()
-        .properties(
-            mapOf(
-                "subject" to StringSchema(),
-                "mode" to StringSchema()._enum(listOf("ALL", "ANY", "ONE")),
-                "claims" to this.toClaimsSchema()
-            )
+        .description("Map of consumer-specified claim IDs to claims")
+        .additionalProperties(
+            ObjectSchema()
+                .properties(
+                    mapOf(
+                        "subject" to StringSchema(),
+                        "mode" to StringSchema()._enum(listOf("ALL", "ANY", "ONE")),
+                        "claims" to this.toClaimsSchema()
+                    )
+                )
         )
 }
 

@@ -231,3 +231,27 @@ fun businessRulesPreventMutation(actionVerb: String, actionPastTense: String): P
         409
     )
 }
+
+fun successfulClaimResponse(): Pair<String, ApiResponse> {
+    return "200" to ApiResponse()
+        .description("Claims Successfully Evaluated")
+        .content(
+            Content().addMediaType(
+                "application/json", MediaType().schema(
+                    ObjectSchema()
+                        .properties(mapOf(
+                            "metadata" to metadataSchema()
+                        ))
+                        .additionalProperties(ObjectSchema()
+                            .properties(mapOf(
+                                "metadata" to metadataSchema(),
+                                "verified" to BooleanSchema()
+                                    .description("Whether or not this claim was verified")
+                            ))
+                        )
+                        .description("Keys are ")
+                )
+            )
+        )
+}
+
